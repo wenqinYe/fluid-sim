@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Show the velocity_field in the visualizaiton
+    // Show the velocity_field  in the visualizaiton
     bool show_v_field = true;
     if (show_v_field) {
         for (int i = 0; i < dim; i++) {
