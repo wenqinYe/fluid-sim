@@ -1,3 +1,4 @@
+#include <project.h>
 #include <Eigen/Dense>
 #include <EigenTypes.h>
 

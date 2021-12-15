@@ -16,6 +16,7 @@ bool simulation_callback() {
         // Move the particles 
         //P =  Eigen::MatrixXd::Random(100000,3);
 
+        
 
     }
 
