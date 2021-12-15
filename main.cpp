@@ -4,7 +4,13 @@
 #include <add_force.h>
 
 igl::opengl::glfw::Viewer viz;
+
+// Simulation state 
 Eigen::MatrixXd P;
+Eigen::VectorXd V_field_x;
+Eigen::VectorXd V_field_y;
+Eigen::VectorXd V_field_z;
+
 double t = 0; //simulation time 
 double dt = 0.00001; //time step
 int dim = 10;
@@ -16,7 +22,7 @@ bool simulation_callback() {
         // Move the particles 
         //P =  Eigen::MatrixXd::Random(100000,3);
 
-        
+
 
     }
 
@@ -58,9 +64,9 @@ int main(int argc, char **argv) {
     double domain = 1;
 
     // Each vector in the velocity field is represented by an entry in each of these vectors (one entry per dimension)
-    Eigen::VectorXd V_field_x(std::pow(dim, 3.0));
-    Eigen::VectorXd V_field_y(std::pow(dim, 3.0));
-    Eigen::VectorXd V_field_z(std::pow(dim, 3.0));
+    V_field_x = Eigen::VectorXd(std::pow(dim, 3.0));
+    V_field_y = Eigen::VectorXd(std::pow(dim, 3.0));
+    V_field_z = Eigen::VectorXd(std::pow(dim, 3.0));
 
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
