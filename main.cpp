@@ -2,6 +2,9 @@
 #include <thread>
 #include <visualization.h>
 #include <add_force.h>
+#include <common.h>
+#include <advect.h>
+#include <cmath>
 
 igl::opengl::glfw::Viewer viz;
 
@@ -13,17 +16,14 @@ Eigen::VectorXd V_field_z;
 
 double t = 0; //simulation time 
 double dt = 0.00001; //time step
+bool simulating = true;
+
+// Global values also accessible by the functions in src/*
 int dim = 10;
 int dim3 = std::pow(dim, 3.0);
-bool simulating = true;
 double domain = 5;
 
-int flat_index(int i, int j, int k) {
-    return (i * dim) + j + (dim * dim * k); 
-}
-
 bool simulation_callback() {
-
     while(simulating) {
         //P =  Eigen::MatrixXd::Random(100000,3);
 
@@ -31,7 +31,6 @@ bool simulation_callback() {
         Eigen::VectorXd V_field_x_1;
         Eigen::VectorXd V_field_y_1;
         Eigen::VectorXd V_field_z_1;
-
 
         Eigen::VectorXd f_x(V_field_x.size());
         Eigen::VectorXd f_y(V_field_y.size());
@@ -43,21 +42,34 @@ bool simulation_callback() {
             f_z(i) = 0;
         }
         
-        // add a constant upwards force of 2 to the first few velocity cells
-        for (int i = 0; i < 10; i++) {
-            f_x(i) += 1; 
+        // add a diagonal upswards force of 1 to the first few velocity cells
+        for (int i = 2; i < 8; i++) {
+            for (int j = 2; j < 8; j++) {
+                // f_x(flat_index(i, j, 0)) = 0; 
+                // f_y(flat_index(i, j, 0)) = 0; 
+                // f_z(flat_index(i, j, 0)) = 1; 
+            }
         }
 
         add_force(V_field_x_1, V_field_x, f_x, dt);
         add_force(V_field_y_1, V_field_y, f_y, dt);
-        add_force(V_field_y_1, V_field_z, f_z, dt);
+        add_force(V_field_z_1, V_field_z, f_z, dt);
 
 
         /******** 2. Advect ********/
-        //advect()
+        Eigen::VectorXd V_field_x_2;
+        Eigen::VectorXd V_field_y_2;
+        Eigen::VectorXd V_field_z_2;
 
+        advect(
+            V_field_x_2, V_field_y_2, V_field_z_2, // Output vector field
+            V_field_x_1, V_field_y_1, V_field_z_1, // Input vector field
+            dt
+        );
 
-        V_field_x = V_field_x_1;
+        V_field_x = V_field_x_2;
+        V_field_y = V_field_y_2;
+        V_field_z = V_field_z_2;
 
         t += dt;
     }
@@ -117,14 +129,24 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dim; j++) {
                 for (int k = 0; k < dim; k++) {
                     int flat = flat_index(i, j, k);
-                    V_field_x(flat) = 1;
-                    V_field_y(flat) = 1;
-                    V_field_z(flat) = 1;
+                    V_field_x(flat) = i / (double) dim;
+                    V_field_y(flat) = j / (double) dim;
+                    V_field_z(flat) = k / (double) dim;
                 }
         }
     }
 
-    // Show the velocity_field  in the visualizaiton
+    // Show the velocity_field in the visualizaiton
+    //
+    // Indexing of velocity field (i = column, j = row, k = depth/height) 
+    //   (i -> x axis), (j -> y axis), (k -> z axis):
+    //  
+    // k
+    // ^   j
+    // |  7
+    // | /
+    // |/
+    // +-----------> i
     bool show_v_field = true;
     if (show_v_field) {
         for (int i = 0; i < dim; i++) {
@@ -133,7 +155,7 @@ int main(int argc, char **argv) {
                     int flat = flat_index(i, j, k);
 
                     Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
-
+                    
                     Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
                     Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
 
