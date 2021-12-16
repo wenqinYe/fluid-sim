@@ -14,22 +14,60 @@ Eigen::VectorXd V_field_z;
 double t = 0; //simulation time 
 double dt = 0.00001; //time step
 int dim = 10;
+int dim3 = std::pow(dim, 3.0);
 bool simulating = true;
+double domain = 5;
+
+int flat_index(int i, int j, int k) {
+    return (i * dim) + j + (dim * dim * k); 
+}
 
 bool simulation_callback() {
 
     while(simulating) {
-        // Move the particles 
         //P =  Eigen::MatrixXd::Random(100000,3);
 
+        /******** 1. Apply forces ********/
+        Eigen::VectorXd V_field_x_1;
+        Eigen::VectorXd V_field_y_1;
+        Eigen::VectorXd V_field_z_1;
 
 
+        Eigen::VectorXd f_x(V_field_x.size());
+        Eigen::VectorXd f_y(V_field_y.size());
+        Eigen::VectorXd f_z(V_field_z.size());
+
+        for (int i = 0; i < dim3; i++) {
+            f_x(i) = 0;
+            f_y(i) = 0;
+            f_z(i) = 0;
+        }
+        
+        // add a constant upwards force of 2 to the first few velocity cells
+        for (int i = 0; i < 10; i++) {
+            f_x(i) += 1; 
+        }
+
+        add_force(V_field_x_1, V_field_x, f_x, dt);
+        add_force(V_field_y_1, V_field_y, f_y, dt);
+        add_force(V_field_y_1, V_field_z, f_z, dt);
+
+
+        /******** 2. Advect ********/
+        //advect()
+
+
+        V_field_x = V_field_x_1;
+
+        t += dt;
     }
 
     return false;
 }
 
 bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
+    viewer.data().clear();
+
     // Redraw the points on the visualization
     // viewer.data().clear();
     // viewer.data().point_size = 4;
@@ -37,19 +75,28 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 
     // Redraw the velocity field on the visualization
 
+    bool show_v_field = true;
+    if (show_v_field) {
+        for (int k = 0; k < dim; k++) { // Put k on outside to optimize memory access of V_field
+            for (int i = 0; i < dim; i++) {
+                for (int j = 0; j < dim; j++) {
+                    int flat = flat_index(i, j, k);
+
+                    Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
+
+                    Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
+                    Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
+
+                    viz.data().add_edges(V1, V2, Eigen::RowVector3d(0,0,0));
+                }
+            }
+        }
+    }
+
     return false;
 }
 
-int flat_index(int i, int j, int k) {
-    return (i * dim) + j + (dim * dim * k); 
-}
-
-
 int main(int argc, char **argv) {
-    /******** Start simulation on background thread ********/
-    std::thread simulation_thread(simulation_callback);
-    simulation_thread.detach();
-
     /******** Create the draw callback ********/
     viz.callback_post_draw = &draw_callback;
 
@@ -61,8 +108,6 @@ int main(int argc, char **argv) {
     // v.data().set_points(P,Eigen::RowVector3d(0,0,0));
 
     /******** Create the initial velocity field and add them to the visualization ********/
-    double domain = 1;
-
     // Each vector in the velocity field is represented by an entry in each of these vectors (one entry per dimension)
     V_field_x = Eigen::VectorXd(std::pow(dim, 3.0));
     V_field_y = Eigen::VectorXd(std::pow(dim, 3.0));
@@ -72,9 +117,9 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dim; j++) {
                 for (int k = 0; k < dim; k++) {
                     int flat = flat_index(i, j, k);
-                    V_field_x(flat) = 0.1;
-                    V_field_y(flat) = 0.1;
-                    V_field_z(flat) = 0.1;
+                    V_field_x(flat) = 1;
+                    V_field_y(flat) = 1;
+                    V_field_z(flat) = 1;
                 }
         }
     }
@@ -97,6 +142,10 @@ int main(int argc, char **argv) {
             }
         }
     }
+
+    /******** Start simulation on background thread ********/
+    std::thread simulation_thread(simulation_callback);
+    simulation_thread.detach();
 
     viz.launch();
     return 1; 
