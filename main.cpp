@@ -72,7 +72,7 @@ bool simulation_callback() {
 
         /******** 3. Diffuse ********/
 
-        
+
 
         V_field_x = V_field_x_2;
         V_field_y = V_field_y_2;
@@ -142,6 +142,7 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dim; j++) {
                 for (int k = 0; k < dim; k++) {
                     int flat = flat_index(i, j, k);
+
                     double x = -1 * (dim / 2) + i;
                     double y = -1 * (dim / 2) + j;
                     double z = -1 * (dim / 2) + k;
