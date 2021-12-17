@@ -19,7 +19,7 @@ double dt = 0.00001; //time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
-int dim = 8;
+int dim = 9;
 int dim3 = std::pow(dim, 3.0);
 double domain = dim;
 
@@ -106,9 +106,13 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
                     V_magnitude_vector *= 0.5;
                     
                     Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
-                    Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
+                    Eigen::RowVector3d V2 = V1 + V_magnitude_vector;            
+                    
+                    int half_dim = dim / 2;
+                    Eigen::RowVector3d offset;
+                    offset << half_dim, half_dim, half_dim;
 
-                    viz.data().add_edges(V1, V2, Eigen::RowVector3d(0,0,0));
+                    viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0,0,0));
                 }
             }
         }
@@ -192,7 +196,11 @@ int main(int argc, char **argv) {
                     Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
                     Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
 
-                    viz.data().add_edges(V1, V2, Eigen::RowVector3d(0,0,0));
+                    int half_dim = dim / 2;
+                    Eigen::RowVector3d offset;
+                    offset << half_dim, half_dim, half_dim;
+
+                    viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0,0,0));
                 }
             }
         }

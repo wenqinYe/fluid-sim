@@ -38,7 +38,7 @@ void advect(
                 
                 // Interpolate to get new velsocity value
                 Eigen::Vector3d new_velocity;
-                trilinear_interpolation(new_velocity, backtraced_pos, V_field_x0, V_field_x0, V_field_z0);
+                trilinear_interpolation(new_velocity, backtraced_pos, V_field_x0, V_field_y0, V_field_z0);
                 
                 // printf("==============new_velocity: (%f, %f, %f) -> (%d, %d %d) | old velocity (%f, %f, %f)\n", 
                 //     new_velocity(0), new_velocity(1), new_velocity(2),
