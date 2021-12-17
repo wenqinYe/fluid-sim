@@ -24,7 +24,7 @@ int dim3 = std::pow(dim, 3.0);
 double domain = dim;
 
 bool simulation_callback() {
-    while(simulating && (t < dt * 5000000)) {
+    while(simulating && (t < dt * 10000)) {
         // std::cout << "----------------------- ITER -----------------------" << std::endl;
         //P =  Eigen::MatrixXd::Random(100000,3);
 
@@ -42,6 +42,7 @@ bool simulation_callback() {
             f_y(i) = 0;
             f_z(i) = 0;
         }
+
         
         // add an upwards force of 1 to all the cells on the x,y plane
         // for (int i = 1; i < dim-1; i++) {
@@ -55,7 +56,8 @@ bool simulation_callback() {
         add_force(V_field_x_1, V_field_x, f_x, dt);
         add_force(V_field_y_1, V_field_y, f_y, dt);
         add_force(V_field_z_1, V_field_z, f_z, dt);
-
+    
+        apply_fixed_boundary_constraint(V_field_x_1, V_field_y_1, V_field_z_1);
 
         /******** 2. Advect ********/
         Eigen::VectorXd V_field_x_2;
@@ -134,20 +136,30 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dim; j++) {
                 for (int k = 0; k < dim; k++) {
                     int flat = flat_index(i, j, k);
-                    V_field_x(flat) = 0;
-                    V_field_y(flat) = 0;
-                    V_field_z(flat) = 0;
+                    double x = -1 * (dim / 2) + i;
+                    double y = -1 * (dim / 2) + j;
+                    double z = -1 * (dim / 2) + k;
+                    double denom = std::pow(x, 2.0) + std::pow(y, 2.0) + std::pow(z, 2.0);
+                    if (denom != 0) {
+                        V_field_x(flat) = x / denom;
+                        V_field_y(flat) = y / denom;
+                        V_field_z(flat) = z / denom;
+                    } else {
+                        V_field_x(flat) = 0;
+                        V_field_y(flat) = 0;
+                        V_field_z(flat) = 0;  
+                    }
                 }
         }
     }
 
-    for (int i = 1; i < dim-1; i++) {
-        for (int j = 1; j < dim-1; j++) {
-            V_field_x(flat_index(i, j, 1)) = 0; 
-            V_field_y(flat_index(i, j, 1)) = 0; 
-            V_field_z(flat_index(i, j, 1)) = 1; 
-        }
-    }
+    // for (int i = 1; i < dim-1; i++) {
+    //     for (int j = 1; j < dim-1; j++) {
+    //         V_field_x(flat_index(i, j, 1)) = 0; 
+    //         V_field_y(flat_index(i, j, 1)) = 0; 
+    //         V_field_z(flat_index(i, j, 1)) = 1; 
+    //     }
+    // }
 
 
     // Show the velocity_field in the visualizaiton
