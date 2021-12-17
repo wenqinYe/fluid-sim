@@ -132,6 +132,8 @@ int main(int argc, char **argv) {
     V_field_y = Eigen::VectorXd(std::pow(dim, 3.0));
     V_field_z = Eigen::VectorXd(std::pow(dim, 3.0));
 
+    // This creates a velocity field that initially has vectors moving out from some central point
+    // (like an explosion from a central point)
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
                 for (int k = 0; k < dim; k++) {
