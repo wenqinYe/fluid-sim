@@ -44,13 +44,13 @@ bool simulation_callback() {
         }
         
         // add an upwards force of 1 to all the cells on the x,y plane
-        for (int i = 1; i < dim-1; i++) {
-            for (int j = 1; j < dim-1; j++) {
-                f_x(flat_index(i, j, 1)) = 1; 
-                f_y(flat_index(i, j, 1)) = 0; 
-                f_z(flat_index(i, j, 1)) = 1; 
-            }
-        }
+        // for (int i = 1; i < dim-1; i++) {
+        //     for (int j = 1; j < dim-1; j++) {
+        //         f_x(flat_index(i, j, 1)) = 1; 
+        //         f_y(flat_index(i, j, 1)) = 0; 
+        //         f_z(flat_index(i, j, 1)) = 1; 
+        //     }
+        // }
 
         add_force(V_field_x_1, V_field_x, f_x, dt);
         add_force(V_field_y_1, V_field_y, f_y, dt);
@@ -97,6 +97,7 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 
                     Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
                     V_magnitude_vector = V_magnitude_vector / V_magnitude_vector.norm();
+                    V_magnitude_vector *= 0.5;
                     
                     Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
                     Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
@@ -111,6 +112,8 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 }
 
 int main(int argc, char **argv) {
+    viz.core().background_color.setOnes();
+
     /******** Create the draw callback ********/
     viz.callback_post_draw = &draw_callback;
 
@@ -137,6 +140,15 @@ int main(int argc, char **argv) {
                 }
         }
     }
+
+    for (int i = 1; i < dim-1; i++) {
+        for (int j = 1; j < dim-1; j++) {
+            V_field_x(flat_index(i, j, 1)) = 0; 
+            V_field_y(flat_index(i, j, 1)) = 0; 
+            V_field_z(flat_index(i, j, 1)) = 1; 
+        }
+    }
+
 
     // Show the velocity_field in the visualizaiton
     //
