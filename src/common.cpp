@@ -9,62 +9,117 @@ void apply_fixed_boundary_constraint(
     Eigen::VectorXd &V_field_y, 
     Eigen::VectorXd &V_field_z
 ) {
-    // The idea here is on the walls, set the field value to be the same as the feild value
-    // just outside of that wall (with the relevant normal component zeroed out)
-    
+
     // Wall where k is 0
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-            V_field_x(flat_index(i, j, 0)) = V_field_x(flat_index(i, j, 1));
-            V_field_y(flat_index(i, j, 0)) = V_field_y(flat_index(i, j, 1));
-            V_field_z(flat_index(i, j, 0)) = 0;
+            V_field_x(flat_index(i, j, 0)) = -1 * V_field_x(flat_index(i, j, 1));
+            V_field_y(flat_index(i, j, 0)) = -1 * V_field_y(flat_index(i, j, 1));
+            V_field_z(flat_index(i, j, 0)) = -1 * V_field_z(flat_index(i, j, 1));
         }
     }
 
     // Wall where k is dim - 1
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-            V_field_x(flat_index(i, j, dim-1)) = V_field_x(flat_index(i, j, dim-2));
-            V_field_y(flat_index(i, j, dim-1)) = V_field_y(flat_index(i, j, dim-2));
-            V_field_z(flat_index(i, j, dim-1)) = 0;
+            V_field_x(flat_index(i, j, dim-1)) = -1 * V_field_x(flat_index(i, j, dim-2));
+            V_field_y(flat_index(i, j, dim-1)) = -1 * V_field_y(flat_index(i, j, dim-2));
+            V_field_z(flat_index(i, j, dim-1)) = -1 * V_field_z(flat_index(i, j, dim-2));
         }
     }
 
     // Wall where j is 0
     for (int i = 0; i < dim; i++) {
         for (int k = 0; k < dim; k++) {
-            V_field_x(flat_index(i, 0, k)) = V_field_x(flat_index(i, 1, k));
-            V_field_y(flat_index(i, 0, k)) = 0;
-            V_field_z(flat_index(i, 0, k)) = V_field_z(flat_index(i, 1, k));
+            V_field_x(flat_index(i, 0, k)) = -1 * V_field_x(flat_index(i, 1, k));
+            V_field_y(flat_index(i, 0, k)) = -1 * V_field_y(flat_index(i, 1, k));
+            V_field_z(flat_index(i, 0, k)) = -1 * V_field_z(flat_index(i, 1, k));
         }
     }
 
     // Wall where j is dim-1
     for (int i = 0; i < dim; i++) {
         for (int k = 0; k < dim; k++) {
-            V_field_x(flat_index(i, dim-1, k)) = V_field_x(flat_index(i, dim-2, k));
-            V_field_y(flat_index(i, dim-1, k)) = 0;
-            V_field_z(flat_index(i, dim-1, k)) = V_field_z(flat_index(i, dim-2, k));
+            V_field_x(flat_index(i, dim-1, k)) = -1 * V_field_x(flat_index(i, dim-2, k));
+            V_field_y(flat_index(i, dim-1, k)) = -1 * V_field_y(flat_index(i, dim-2, k));
+            V_field_z(flat_index(i, dim-1, k)) = -1 * V_field_z(flat_index(i, dim-2, k));
         }
     }
 
     // Wall where i is 0
     for (int j = 0; j < dim; j++) {
         for (int k = 0; k < dim; k++) {
-            V_field_x(flat_index(0, j, k)) = 0;
-            V_field_y(flat_index(0, j, k)) = V_field_y(flat_index(1, j, k));
-            V_field_z(flat_index(0, j, k)) = V_field_z(flat_index(1, j, k));
+            V_field_x(flat_index(0, j, k)) = -1 * V_field_x(flat_index(1, j, k));
+            V_field_y(flat_index(0, j, k)) = -1 * V_field_y(flat_index(1, j, k));
+            V_field_z(flat_index(0, j, k)) = -1 * V_field_z(flat_index(1, j, k));
         }
     }
 
     // Wall where i is dim-1
     for (int j = 0; j < dim; j++) {
         for (int k = 0; k < dim; k++) {
-            V_field_x(flat_index(dim-1, j, k)) = 0;
-            V_field_y(flat_index(dim-1, j, k)) = V_field_y(flat_index(dim-2, j, k));
-            V_field_z(flat_index(dim-1, j, k)) = V_field_z(flat_index(dim-2, j, k));
+            V_field_x(flat_index(dim-1, j, k)) = -1 * V_field_x(flat_index(dim-2, j, k));
+            V_field_y(flat_index(dim-1, j, k)) = -1 * V_field_y(flat_index(dim-2, j, k));
+            V_field_z(flat_index(dim-1, j, k)) = -1 * V_field_z(flat_index(dim-2, j, k));
         }
     }
+
+    // The idea here is on the walls, set the field value to be the same as the feild value
+    // just outside of that wall (with the relevant normal component zeroed out)
+    
+    // // Wall where k is 0
+    // for (int i = 0; i < dim; i++) {
+    //     for (int j = 0; j < dim; j++) {
+    //         V_field_x(flat_index(i, j, 0)) = V_field_x(flat_index(i, j, 1));
+    //         V_field_y(flat_index(i, j, 0)) = V_field_y(flat_index(i, j, 1));
+    //         V_field_z(flat_index(i, j, 0)) = 0;
+    //     }
+    // }
+
+    // // Wall where k is dim - 1
+    // for (int i = 0; i < dim; i++) {
+    //     for (int j = 0; j < dim; j++) {
+    //         V_field_x(flat_index(i, j, dim-1)) = V_field_x(flat_index(i, j, dim-2));
+    //         V_field_y(flat_index(i, j, dim-1)) = V_field_y(flat_index(i, j, dim-2));
+    //         V_field_z(flat_index(i, j, dim-1)) = 0;
+    //     }
+    // }
+
+    // // Wall where j is 0
+    // for (int i = 0; i < dim; i++) {
+    //     for (int k = 0; k < dim; k++) {
+    //         V_field_x(flat_index(i, 0, k)) = V_field_x(flat_index(i, 1, k));
+    //         V_field_y(flat_index(i, 0, k)) = 0;
+    //         V_field_z(flat_index(i, 0, k)) = V_field_z(flat_index(i, 1, k));
+    //     }
+    // }
+
+    // // Wall where j is dim-1
+    // for (int i = 0; i < dim; i++) {
+    //     for (int k = 0; k < dim; k++) {
+    //         V_field_x(flat_index(i, dim-1, k)) = V_field_x(flat_index(i, dim-2, k));
+    //         V_field_y(flat_index(i, dim-1, k)) = 0;
+    //         V_field_z(flat_index(i, dim-1, k)) = V_field_z(flat_index(i, dim-2, k));
+    //     }
+    // }
+
+    // // Wall where i is 0
+    // for (int j = 0; j < dim; j++) {
+    //     for (int k = 0; k < dim; k++) {
+    //         V_field_x(flat_index(0, j, k)) = 0;
+    //         V_field_y(flat_index(0, j, k)) = V_field_y(flat_index(1, j, k));
+    //         V_field_z(flat_index(0, j, k)) = V_field_z(flat_index(1, j, k));
+    //     }
+    // }
+
+    // // Wall where i is dim-1
+    // for (int j = 0; j < dim; j++) {
+    //     for (int k = 0; k < dim; k++) {
+    //         V_field_x(flat_index(dim-1, j, k)) = 0;
+    //         V_field_y(flat_index(dim-1, j, k)) = V_field_y(flat_index(dim-2, j, k));
+    //         V_field_z(flat_index(dim-1, j, k)) = V_field_z(flat_index(dim-2, j, k));
+    //     }
+    // }
 }
 
 void trilinear_interpolation(

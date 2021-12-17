@@ -70,6 +70,10 @@ bool simulation_callback() {
             dt
         );
 
+        /******** 3. Diffuse ********/
+
+        
+
         V_field_x = V_field_x_2;
         V_field_y = V_field_y_2;
         V_field_z = V_field_z_2;
