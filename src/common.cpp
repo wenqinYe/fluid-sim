@@ -134,14 +134,6 @@ void trilinear_interpolation(
     // Constrain it so that we are not doing interpolation on the outer edges
     Eigen::Vector3d pos = position;
 
-    // pos(0) = std::max(voxel_dim, pos(0));
-    // pos(1) = std::max(voxel_dim, pos(1));
-    // pos(2) = std::max(voxel_dim, pos(2));
-
-    // pos(0) = std::min(domain-2*voxel_dim, pos(0));
-    // pos(1) = std::min(domain-2*voxel_dim, pos(1));
-    // pos(2) = std::min(domain-2*voxel_dim, pos(2));
-
     // Get the indices for the closest cells
     double x = (pos(0) - voxel_dim/2.0)/voxel_dim;
     double y = (pos(1) - voxel_dim/2.0)/voxel_dim;
