@@ -19,7 +19,7 @@ double dt = 0.00001; //time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
-int dim = 4;
+int dim = 8;
 int dim3 = std::pow(dim, 3.0);
 double domain = dim;
 
@@ -96,7 +96,8 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
                     int flat = flat_index(i, j, k);
 
                     Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
-
+                    V_magnitude_vector = V_magnitude_vector / V_magnitude_vector.norm();
+                    
                     Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
                     Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
 
