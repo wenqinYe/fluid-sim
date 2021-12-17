@@ -1,3 +1,4 @@
+#include <diffuse.h>
 #include <Eigen/Dense>
 #include <EigenTypes.h>
 

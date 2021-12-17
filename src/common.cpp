@@ -78,6 +78,7 @@ void trilinear_interpolation(
 
     // Constrain it so that we are not doing interpolation on the outer edges
     Eigen::Vector3d pos = position;
+
     pos(0) = std::max(voxel_dim, pos(0));
     pos(1) = std::max(voxel_dim, pos(1));
     pos(2) = std::max(voxel_dim, pos(2));
@@ -87,16 +88,25 @@ void trilinear_interpolation(
     pos(2) = std::min(domain-2*voxel_dim, pos(2));
 
     // Get the indices for the closest cells
-    double x_floor = std::floor((pos(0) - voxel_dim/2.0)/voxel_dim);
-    double x_ceil = std::ceil((pos(0) - voxel_dim/2.0)/voxel_dim);
-    double y_floor = std::floor((pos(1) - voxel_dim/2.0)/voxel_dim);
-    double y_ceil = std::ceil((pos(1) - voxel_dim/2.0)/voxel_dim);
-    double z_floor = std::floor((pos(1) - voxel_dim/2.0)/voxel_dim);
-    double z_ceil = std::ceil((pos(1) - voxel_dim/2.0)/voxel_dim);
+    double x = (pos(0) - voxel_dim/2.0)/voxel_dim;
+    double y = (pos(1) - voxel_dim/2.0)/voxel_dim;
+    double z = (pos(1) - voxel_dim/2.0)/voxel_dim;
 
-    double x_diff = (pos(0) - voxel_dim/2.0 - x_floor) / (x_ceil - x_floor);
-    double y_diff = (pos(1) - voxel_dim/2.0 - y_floor) / (y_ceil - y_floor);
-    double z_diff = (pos(2) - voxel_dim/2.0 - z_floor) / (z_ceil - z_floor);
+    double x_floor = std::floor(x);
+    double y_floor = std::floor(y);
+    double z_floor = std::floor(z);
+
+    double x_ceil = x_floor + 1;
+    double y_ceil = y_floor + 1;
+    double z_ceil = z_floor + 1;
+
+    double x_diff = (x - x_floor) / (x_ceil - x_floor);
+    double y_diff = (y - y_floor) / (y_ceil - y_floor);
+    double z_diff = (z - z_floor) / (z_ceil - z_floor);
+    
+    // printf("sums of fields3: %f %f %f\n", V_field_x0.sum(), V_field_y0.sum(), V_field_z0.sum());
+    // printf("%f %f | %f %f | %f %f\n", x_floor, x_ceil, y_floor, y_ceil, z_floor, z_ceil);
+    // printf("diffs %f %f %f\n", x_diff, y_diff, z_diff);
 
     // Get the field values for the 8 cells that are close to the passed in pos
     int idx = flat_index(x_floor, y_floor, z_floor);

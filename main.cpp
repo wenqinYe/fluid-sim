@@ -19,12 +19,13 @@ double dt = 0.00001; //time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
-int dim = 10;
+int dim = 4;
 int dim3 = std::pow(dim, 3.0);
-double domain = 5;
+double domain = dim;
 
 bool simulation_callback() {
-    while(simulating) {
+    while(simulating && (t < dt * 5000000)) {
+        // std::cout << "----------------------- ITER -----------------------" << std::endl;
         //P =  Eigen::MatrixXd::Random(100000,3);
 
         /******** 1. Apply forces ********/
@@ -42,12 +43,12 @@ bool simulation_callback() {
             f_z(i) = 0;
         }
         
-        // add a diagonal upswards force of 1 to the first few velocity cells
-        for (int i = 2; i < 8; i++) {
-            for (int j = 2; j < 8; j++) {
-                // f_x(flat_index(i, j, 0)) = 0; 
-                // f_y(flat_index(i, j, 0)) = 0; 
-                // f_z(flat_index(i, j, 0)) = 1; 
+        // add an upwards force of 1 to all the cells on the x,y plane
+        for (int i = 1; i < dim-1; i++) {
+            for (int j = 1; j < dim-1; j++) {
+                f_x(flat_index(i, j, 1)) = 1; 
+                f_y(flat_index(i, j, 1)) = 0; 
+                f_z(flat_index(i, j, 1)) = 1; 
             }
         }
 
@@ -129,9 +130,9 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dim; j++) {
                 for (int k = 0; k < dim; k++) {
                     int flat = flat_index(i, j, k);
-                    V_field_x(flat) = i / (double) dim;
-                    V_field_y(flat) = j / (double) dim;
-                    V_field_z(flat) = k / (double) dim;
+                    V_field_x(flat) = 0;
+                    V_field_y(flat) = 0;
+                    V_field_z(flat) = 0;
                 }
         }
     }
