@@ -19,8 +19,8 @@ void diffuse(
     typedef Eigen::Triplet<double> TRI;
     std::vector<TRI> tripletList_laplace;
 
-    double pos_grad_coeff = 1.0 / (2.0 * dim);
-    double neg_grad_coeff = -1.0 / (2.0 * dim);
+    double pos_grad_coeff = 1.0 / std::pow(2.0 * dim, 2.0);
+    double neg_grad_coeff = -1.0 / std::pow(2.0 * dim, 2.0);
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
