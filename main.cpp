@@ -2,6 +2,7 @@
 #include <advect.h>
 #include <common.h>
 #include <visualization.h>
+#include <diffuse.h>
 
 #include <cmath>
 #include <iostream>
@@ -20,7 +21,7 @@ double dt = 0.00001;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
-int dim = 9;
+int dim = 8;
 int dim3 = std::pow(dim, 3.0);
 double domain = dim;
 bool show_v_field = true;
@@ -72,7 +73,7 @@ bool simulation_callback() {
         // for (int i = 1; i < dim-1; i++) {
         //     for (int j = 1; j < dim-1; j++) {
         //         f_x(flat_index(i, j, 1)) = 1;
-        //         f_y(flat_index(i, j, 1)) = 0;
+        //         f_y(flat_index(i, j, 1)) = 1;
         //         f_z(flat_index(i, j, 1)) = 1;
         //     }
         // }
@@ -95,10 +96,25 @@ bool simulation_callback() {
         );
 
         /******** 3. Diffuse ********/
+        Eigen::VectorXd V_field_x_3;
+        Eigen::VectorXd V_field_y_3;
+        Eigen::VectorXd V_field_z_3;
 
-        V_field_x = V_field_x_2;
-        V_field_y = V_field_y_2;
-        V_field_z = V_field_z_2;
+        diffuse( 
+            V_field_x_3, V_field_y_3, V_field_z_3,  // Output vector field
+            V_field_x_2, V_field_y_2, V_field_z_2,  // Input vector field
+            dt
+        );
+
+
+        /******* Update Velocity fields with new values ********/
+        // V_field_x = V_field_x_2;
+        // V_field_y = V_field_y_2;
+        // V_field_z = V_field_z_2;
+
+        V_field_x = V_field_x_3;
+        V_field_y = V_field_y_3;
+        V_field_z = V_field_z_3;
 
         t += dt;
     }
