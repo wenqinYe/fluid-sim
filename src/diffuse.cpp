@@ -14,34 +14,30 @@ void diffuse(
     Eigen::VectorXd global_field(3 * dim3);
     global_field << V_field_x0, V_field_y0, V_field_z0;
 
-    double viscocity = 1.0;
-
     // Construct the gradient operator matrix
     Eigen::SparseMatrixd grad_operator(3 * dim3, 3 * dim3);
-    typedef Eigen::Triplet<double> Temp;
-    std::vector<Temp> tripletList_grad;
+    typedef Eigen::Triplet<double> TRI;
+    std::vector<TRI> tripletList_grad;
 
+
+    double pos_grad_coeff = 1.0 / (2.0 * dim);
+    double neg_grad_coeff = -1.0 / (2.0 * dim);
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
             for (int j = 1; j < dim - 1; j++) {
                 // Add x gradient operator for i, j, k
-                int row = flat_index(i, j, k);
-                double delta_x = dim;
-                tripletList_grad.push_back(Temp(row, flat_index(i-1, j, k), -1.0 / (2.0 * delta_x)));
-                tripletList_grad.push_back(Temp(row, flat_index(i+1, j, k), 1.0 / (2.0 * delta_x)));
+                int row_ind = flat_index(i, j, k);
+                tripletList_grad.push_back(TRI(row_ind, flat_index(i-1, j, k), neg_grad_coeff));
+                tripletList_grad.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
 
                 // Add y gradient opeartor for i, j, k
-                row = flat_index(i, j, k) + dim3;
-                double delta_y = dim;
-                tripletList_grad.push_back(Temp(row, flat_index(i, j-1, k), -1.0 / (2.0 * delta_y)));
-                tripletList_grad.push_back(Temp(row, flat_index(i, j+1, k), 1.0 / (2.0 * delta_y)));
+                tripletList_grad.push_back(TRI(row_ind + dim, flat_index(i, j-1, k), neg_grad_coeff)); // ! TODO: the second parameter might have to be shifted
+                tripletList_grad.push_back(TRI(row_ind + dim, flat_index(i, j+1, k), pos_grad_coeff));
 
                 // Add z gradient operator for i, j, k
-                row = flat_index(i, j, k) + 2 * dim3;
-                double delta_z = dim;
-                tripletList_grad.push_back(Temp(row, flat_index(i, j, k-1), -1.0 / (2.0 * delta_z)));
-                tripletList_grad.push_back(Temp(row, flat_index(i, j, k+1), 1.0 / (2.0 * delta_z)));
+                tripletList_grad.push_back(TRI(row_ind + 2 * dim, flat_index(i, j, k-1), neg_grad_coeff));
+                tripletList_grad.push_back(TRI(row_ind + 2 * dim, flat_index(i, j, k+1), pos_grad_coeff));
             }
         }
     }
@@ -50,7 +46,7 @@ void diffuse(
 
     // Construct the divergence operator marix
     Eigen::SparseMatrixd div_operator(3 * dim3, 3 * dim3);
-    std::vector<Temp> tripletList_div;
+    std::vector<TRI> tripletList_div;
     for (int k = 1; k < dim - 1; k++) {
 
         for (int i = 1; i < dim - 1; i++) {
@@ -63,14 +59,14 @@ void diffuse(
                 for (int component = 0; component < 3; component++) {
                     int row = flat_index(i, j, k) + component * dim3;
 
-                    tripletList_div.push_back(Temp(row, flat_index(i-1, j, k), -1.0 / (2.0 * delta_x)));
-                    tripletList_div.push_back(Temp(row, flat_index(i+1, j, k), 1.0 / (2.0 * delta_x)));
+                    tripletList_div.push_back(TRI(row, flat_index(i-1, j, k), -1.0 / (2.0 * delta_x)));
+                    tripletList_div.push_back(TRI(row, flat_index(i+1, j, k), 1.0 / (2.0 * delta_x)));
 
-                    tripletList_div.push_back(Temp(row, flat_index(i, j-1, k), -1.0 / (2.0 * delta_y)));
-                    tripletList_div.push_back(Temp(row, flat_index(i, j+1, k), 1.0 / (2.0 * delta_y)));
+                    tripletList_div.push_back(TRI(row, flat_index(i, j-1, k), -1.0 / (2.0 * delta_y)));
+                    tripletList_div.push_back(TRI(row, flat_index(i, j+1, k), 1.0 / (2.0 * delta_y)));
 
-                    tripletList_div.push_back(Temp(row, flat_index(i, j, k-1), -1.0 / (2.0 * delta_z)));
-                    tripletList_div.push_back(Temp(row, flat_index(i, j, k+1), 1.0 / (2.0 * delta_z)));
+                    tripletList_div.push_back(TRI(row, flat_index(i, j, k-1), -1.0 / (2.0 * delta_z)));
+                    tripletList_div.push_back(TRI(row, flat_index(i, j, k+1), 1.0 / (2.0 * delta_z)));
                 }
 
             }
@@ -81,14 +77,14 @@ void diffuse(
 
     // Construct sparse identity matrix
     Eigen::SparseMatrixd identity(3 * dim3, 3 * dim3);
-    std::vector<Temp> tripletList_identity;
+    std::vector<TRI> tripletList_identity;
     for (int i = 0; i < dim3 * 3; i++) {
-        tripletList_identity.push_back(Temp(i, i, 1.0));
+        tripletList_identity.push_back(TRI(i, i, 1.0));
     }
     identity.setFromTriplets(tripletList_identity.begin(), tripletList_identity.end());
 
     // Create the diffusion operator and then solve for the new velocity field
-    Eigen::SparseMatrixd A = identity - viscocity * dt * (div_operator * grad_operator);
+    Eigen::SparseMatrixd A = identity - viscosity * dt * (div_operator * grad_operator);
 
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> solver;
     solver.compute(A);

@@ -4,6 +4,7 @@
 extern int dim;
 extern int dim3;
 extern double domain;
+extern double viscosity;
 
 int flat_index(int i, int j, int k); 
 

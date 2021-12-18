@@ -16,15 +16,20 @@ Eigen::VectorXd V_field_x;
 Eigen::VectorXd V_field_y;
 Eigen::VectorXd V_field_z;
 
-double t = 0;         // simulation time
+// User Tuned Parameters
 double dt = 0.00001;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
-int dim = 8;
-int dim3 = std::pow(dim, 3.0);
-double domain = dim;
+int dim = 9;
 bool show_v_field = true;
+double viscosity = 1.0;
+
+
+// Non-User Tuned
+double t = 0;         // simulation time
+double domain = dim;
+int dim3 = std::pow(dim, 3.0);
 
 void draw_vector_field() {
     for (int k = 0; k < dim; k++) {  // Put k on outside to optimize memory access of V_field
@@ -63,11 +68,9 @@ bool simulation_callback() {
         Eigen::VectorXd f_y(V_field_y.size());
         Eigen::VectorXd f_z(V_field_z.size());
 
-        for (int i = 0; i < dim3; i++) {
-            f_x(i) = 0;
-            f_y(i) = 0;
-            f_z(i) = 0;
-        }
+        f_x.setZero();
+        f_y.setZero();
+        f_z.setZero();
 
         // add an upwards force of 1 to all the cells on the x,y plane
         // and decay it by 1/(t+1)
@@ -106,6 +109,8 @@ bool simulation_callback() {
             V_field_x_2, V_field_y_2, V_field_z_2,  // Input vector field
             dt
         );
+
+        /******** 4. Project ********/
 
 
         /******* Update Velocity fields with new values ********/
