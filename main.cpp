@@ -70,11 +70,12 @@ bool simulation_callback() {
         }
 
         // add an upwards force of 1 to all the cells on the x,y plane
+        // and decay it by 1/(t+1)
         for (int i = 1; i < dim-1; i++) {
             for (int j = 1; j < dim-1; j++) {
-                f_x(flat_index(i, j, 1)) = 1;
-                f_y(flat_index(i, j, 1)) = 1;
-                f_z(flat_index(i, j, 1)) = 1;
+                f_x(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
+                f_y(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
+                f_z(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
             }
         }
 
