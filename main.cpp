@@ -1,32 +1,57 @@
+#include <add_force.h>
+#include <advect.h>
+#include <common.h>
+#include <visualization.h>
+
+#include <cmath>
 #include <iostream>
 #include <thread>
-#include <visualization.h>
-#include <add_force.h>
-#include <common.h>
-#include <advect.h>
-#include <cmath>
 
 igl::opengl::glfw::Viewer viz;
 
-// Simulation state 
+// Simulation state
 Eigen::MatrixXd P;
 Eigen::VectorXd V_field_x;
 Eigen::VectorXd V_field_y;
 Eigen::VectorXd V_field_z;
 
-double t = 0; //simulation time 
-double dt = 0.00001; //time step
+double t = 0;         // simulation time
+double dt = 0.00001;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
 int dim = 9;
 int dim3 = std::pow(dim, 3.0);
 double domain = dim;
+bool show_v_field = true;
+
+void draw_vector_field() {
+    for (int k = 0; k < dim; k++) {  // Put k on outside to optimize memory access of V_field
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                int flat = flat_index(i, j, k);
+
+                Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
+                V_magnitude_vector = V_magnitude_vector / V_magnitude_vector.norm();
+                V_magnitude_vector *= 0.5;
+
+                Eigen::RowVector3d V1((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
+                Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
+
+                int half_dim = dim / 2;
+                Eigen::RowVector3d offset;
+                offset << half_dim, half_dim, half_dim;
+
+                viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0, 0, 0));
+            }
+        }
+    }
+}
 
 bool simulation_callback() {
-    while(simulating && (t < dt * 10000)) {
+    while (simulating) {
         // std::cout << "----------------------- ITER -----------------------" << std::endl;
-        //P =  Eigen::MatrixXd::Random(100000,3);
+        // P =  Eigen::MatrixXd::Random(100000,3);
 
         /******** 1. Apply forces ********/
         Eigen::VectorXd V_field_x_1;
@@ -43,20 +68,19 @@ bool simulation_callback() {
             f_z(i) = 0;
         }
 
-        
         // add an upwards force of 1 to all the cells on the x,y plane
         // for (int i = 1; i < dim-1; i++) {
         //     for (int j = 1; j < dim-1; j++) {
-        //         f_x(flat_index(i, j, 1)) = 1; 
-        //         f_y(flat_index(i, j, 1)) = 0; 
-        //         f_z(flat_index(i, j, 1)) = 1; 
+        //         f_x(flat_index(i, j, 1)) = 1;
+        //         f_y(flat_index(i, j, 1)) = 0;
+        //         f_z(flat_index(i, j, 1)) = 1;
         //     }
         // }
 
         add_force(V_field_x_1, V_field_x, f_x, dt);
         add_force(V_field_y_1, V_field_y, f_y, dt);
         add_force(V_field_z_1, V_field_z, f_z, dt);
-    
+
         apply_fixed_boundary_constraint(V_field_x_1, V_field_y_1, V_field_z_1);
 
         /******** 2. Advect ********/
@@ -65,14 +89,12 @@ bool simulation_callback() {
         Eigen::VectorXd V_field_z_2;
 
         advect(
-            V_field_x_2, V_field_y_2, V_field_z_2, // Output vector field
-            V_field_x_1, V_field_y_1, V_field_z_1, // Input vector field
+            V_field_x_2, V_field_y_2, V_field_z_2,  // Output vector field
+            V_field_x_1, V_field_y_1, V_field_z_1,  // Input vector field
             dt
         );
 
         /******** 3. Diffuse ********/
-        
-
 
         V_field_x = V_field_x_2;
         V_field_y = V_field_y_2;
@@ -94,29 +116,8 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 
     // Redraw the velocity field on the visualization
 
-    bool show_v_field = true;
-    if (show_v_field) {
-        for (int k = 0; k < dim; k++) { // Put k on outside to optimize memory access of V_field
-            for (int i = 0; i < dim; i++) {
-                for (int j = 0; j < dim; j++) {
-                    int flat = flat_index(i, j, k);
-
-                    Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
-                    V_magnitude_vector = V_magnitude_vector / V_magnitude_vector.norm();
-                    V_magnitude_vector *= 0.5;
-                    
-                    Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
-                    Eigen::RowVector3d V2 = V1 + V_magnitude_vector;            
-                    
-                    int half_dim = dim / 2;
-                    Eigen::RowVector3d offset;
-                    offset << half_dim, half_dim, half_dim;
-
-                    viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0,0,0));
-                }
-            }
-        }
-    }
+    if (show_v_field)
+        draw_vector_field();
 
     return false;
 }
@@ -128,7 +129,7 @@ int main(int argc, char **argv) {
     viz.callback_post_draw = &draw_callback;
 
     /******** Add particles to the visualization ********/
-    P =  Eigen::MatrixXd::Random(100000,3);
+    P = Eigen::MatrixXd::Random(100000, 3);
     // viz.core().is_animating = true;
     // voz.data().clear();
     // viz.data().point_size = 4;
@@ -144,73 +145,52 @@ int main(int argc, char **argv) {
     // (like an explosion from a central point)
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-                for (int k = 0; k < dim; k++) {
-                    int flat = flat_index(i, j, k);
+            for (int k = 0; k < dim; k++) {
+                int flat = flat_index(i, j, k);
 
-                    double x = -1 * (dim / 2) + i;
-                    double y = -1 * (dim / 2) + j;
-                    double z = -1 * (dim / 2) + k;
-                    double denom = std::pow(x, 2.0) + std::pow(y, 2.0) + std::pow(z, 2.0);
-                    if (denom != 0) {
-                        V_field_x(flat) = x / denom;
-                        V_field_y(flat) = y / denom;
-                        V_field_z(flat) = z / denom;
-                    } else {
-                        V_field_x(flat) = 0;
-                        V_field_y(flat) = 0;
-                        V_field_z(flat) = 0;  
-                    }
+                double x = -1 * (dim / 2) + i;
+                double y = -1 * (dim / 2) + j;
+                double z = -1 * (dim / 2) + k;
+                double denom = std::pow(x, 2.0) + std::pow(y, 2.0) + std::pow(z, 2.0);
+                if (denom != 0) {
+                    V_field_x(flat) = x / denom;
+                    V_field_y(flat) = y / denom;
+                    V_field_z(flat) = z / denom;
+                } else {
+                    V_field_x(flat) = 0;
+                    V_field_y(flat) = 0;
+                    V_field_z(flat) = 0;
                 }
+            }
         }
     }
 
     // for (int i = 1; i < dim-1; i++) {
     //     for (int j = 1; j < dim-1; j++) {
-    //         V_field_x(flat_index(i, j, 1)) = 0; 
-    //         V_field_y(flat_index(i, j, 1)) = 0; 
-    //         V_field_z(flat_index(i, j, 1)) = 1; 
+    //         V_field_x(flat_index(i, j, 1)) = 0;
+    //         V_field_y(flat_index(i, j, 1)) = 0;
+    //         V_field_z(flat_index(i, j, 1)) = 1;
     //     }
     // }
 
-
     // Show the velocity_field in the visualizaiton
     //
-    // Indexing of velocity field (i = column, j = row, k = depth/height) 
+    // Indexing of velocity field (i = column, j = row, k = depth/height)
     //   (i -> x axis), (j -> y axis), (k -> z axis):
-    //  
+    //
     // k
     // ^   j
     // |  7
     // | /
     // |/
     // +-----------> i
-    bool show_v_field = true;
-    if (show_v_field) {
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                for (int k = 0; k < dim; k++) {
-                    int flat = flat_index(i, j, k);
-
-                    Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
-                    
-                    Eigen::RowVector3d V1((domain/(double)dim)* (double)i, (domain/(double)dim)*(double)j,(domain/(double)dim)*(double)k);
-                    Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
-
-                    int half_dim = dim / 2;
-                    Eigen::RowVector3d offset;
-                    offset << half_dim, half_dim, half_dim;
-
-                    viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0,0,0));
-                }
-            }
-        }
-    }
+    if (show_v_field)
+        draw_vector_field();
 
     /******** Start simulation on background thread ********/
     std::thread simulation_thread(simulation_callback);
     simulation_thread.detach();
 
     viz.launch();
-    return 1; 
-
+    return 1;
 }
