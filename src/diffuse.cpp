@@ -32,12 +32,12 @@ void diffuse(
                 tripletList_grad.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
 
                 // Add y gradient opeartor for i, j, k
-                tripletList_grad.push_back(TRI(row_ind + dim, flat_index(i, j-1, k) + dim3, neg_grad_coeff));
-                tripletList_grad.push_back(TRI(row_ind + dim, flat_index(i, j+1, k) + dim3, pos_grad_coeff));
+                tripletList_grad.push_back(TRI(row_ind + dim3, flat_index(i, j-1, k) + dim3, neg_grad_coeff));
+                tripletList_grad.push_back(TRI(row_ind + dim3, flat_index(i, j+1, k) + dim3, pos_grad_coeff));
 
                 // Add z gradient operator for i, j, k
-                tripletList_grad.push_back(TRI(row_ind + 2 * dim, flat_index(i, j, k-1) + 2 * dim3, neg_grad_coeff));
-                tripletList_grad.push_back(TRI(row_ind + 2 * dim, flat_index(i, j, k+1) + 2 * dim3, pos_grad_coeff));
+                tripletList_grad.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k-1) + 2 * dim3, neg_grad_coeff));
+                tripletList_grad.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k+1) + 2 * dim3, pos_grad_coeff));
             }
         }
     }
