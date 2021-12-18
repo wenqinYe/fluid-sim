@@ -129,7 +129,7 @@ bool simulation_callback() {
 }
 
 bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
-    viewer.data().clear();
+    // viewer.data().clear();
 
     // Redraw the points on the visualization
     // viewer.data().clear();
@@ -138,8 +138,9 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 
     // Redraw the velocity field on the visualization
 
-    if (show_v_field)
-        draw_vector_field();
+    // if (show_v_field)
+    //     draw_vector_field();
+
 
     return false;
 }
@@ -156,6 +157,11 @@ int main(int argc, char **argv) {
     // voz.data().clear();
     // viz.data().point_size = 4;
     // v.data().set_points(P,Eigen::RowVector3d(0,0,0));
+    // std::map<int, Eigen::RowVector3d> colors;
+    // viz.load_mesh_from_file(std::string("../data/cube.obj"));
+    // colors.emplace(viewer.data().id, 0.5*Eigen::RowVector3d::Random().array() + 0.5);
+    // viz.data_list[0].set_colors(Eigen::RowVector3d(0.9,0.5,0.1));
+
 
     /******** Create the initial velocity field and add them to the visualization ********/
     // Each vector in the velocity field is represented by an entry in each of these vectors (one entry per dimension)

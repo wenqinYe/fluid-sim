@@ -14,11 +14,10 @@ void diffuse(
     Eigen::VectorXd global_field(3 * dim3);
     global_field << V_field_x0, V_field_y0, V_field_z0;
 
-    // Construct the gradient operator matrix
-    Eigen::SparseMatrixd grad_operator(3 * dim3, 3 * dim3);
+    // Construct the laplace pperator matrix
+    Eigen::SparseMatrixd laplace_operator(3 * dim3, 3 * dim3);
     typedef Eigen::Triplet<double> TRI;
-    std::vector<TRI> tripletList_grad;
-
+    std::vector<TRI> tripletList_laplace;
 
     double pos_grad_coeff = 1.0 / (2.0 * dim);
     double neg_grad_coeff = -1.0 / (2.0 * dim);
@@ -26,54 +25,45 @@ void diffuse(
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
             for (int j = 1; j < dim - 1; j++) {
-                // Add x gradient operator for i, j, k
                 int row_ind = flat_index(i, j, k);
-                tripletList_grad.push_back(TRI(row_ind, flat_index(i-1, j, k), neg_grad_coeff));
-                tripletList_grad.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
 
-                // Add y gradient opeartor for i, j, k
-                tripletList_grad.push_back(TRI(row_ind + dim, flat_index(i, j-1, k) + dim3, neg_grad_coeff));
-                tripletList_grad.push_back(TRI(row_ind + dim, flat_index(i, j+1, k) + dim3, pos_grad_coeff));
+                // Laplacian operator for x component of vector field
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k), 6 * neg_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i-1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j-1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j+1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k-1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k+1), pos_grad_coeff));
 
-                // Add z gradient operator for i, j, k
-                tripletList_grad.push_back(TRI(row_ind + 2 * dim, flat_index(i, j, k-1) + 2 * dim3, neg_grad_coeff));
-                tripletList_grad.push_back(TRI(row_ind + 2 * dim, flat_index(i, j, k+1) + 2 * dim3, pos_grad_coeff));
+                // Laplacian operator for y component of vector field
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i-1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i+1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j-1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j+1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k-1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k+1), pos_grad_coeff));
+
+                // Laplacian operator for z component of vector field
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i-1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i+1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j-1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j+1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k-1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k+1), pos_grad_coeff));
             }
         }
     }
-    grad_operator.setFromTriplets(tripletList_grad.begin(), tripletList_grad.end());
-
-
-    // Construct the divergence operator marix
-    Eigen::SparseMatrixd div_operator(3 * dim3, 3 * dim3);
-    std::vector<TRI> tripletList_div;    
-    for (int k = 1; k < dim - 1; k++) {
-        for (int i = 1; i < dim - 1; i++) {
-            for (int j = 1; j < dim - 1; j++) {
-                // Add divergence operator to x, y and z components
-                for (int component = 0; component < 3; component++) {
-                    int row = flat_index(i, j, k) + component * dim3;
-                    tripletList_div.push_back(TRI(row, flat_index(i-1, j, k), neg_grad_coeff));
-                    tripletList_div.push_back(TRI(row, flat_index(i+1, j, k), pos_grad_coeff));
-
-                    tripletList_div.push_back(TRI(row, flat_index(i, j-1, k) + dim3, neg_grad_coeff));
-                    tripletList_div.push_back(TRI(row, flat_index(i, j+1, k) + dim3, pos_grad_coeff));
-
-                    tripletList_div.push_back(TRI(row, flat_index(i, j, k-1) + 2 * dim3, neg_grad_coeff));
-                    tripletList_div.push_back(TRI(row, flat_index(i, j, k+1) + 2 * dim3, pos_grad_coeff));
-                }
-            }
-        }
-    }
-
-    div_operator.setFromTriplets(tripletList_div.begin(), tripletList_div.end());
+    laplace_operator.setFromTriplets(tripletList_laplace.begin(), tripletList_laplace.end());
 
     // Construct sparse identity matrix
     Eigen::SparseMatrixd identity(3 * dim3, 3 * dim3);
     identity.setIdentity();
 
     // Create the diffusion operator and then solve for the new velocity field
-    Eigen::SparseMatrixd A = identity - viscosity * dt * (div_operator * grad_operator);
+    Eigen::SparseMatrixd A = identity - viscosity * dt * laplace_operator;
 
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> solver;
     solver.compute(A);
