@@ -200,6 +200,7 @@ void build_laplace_op() {
     // Construct the laplace operator matrix
     typedef Eigen::Triplet<double> TRI;
     std::vector<TRI> tripletList_laplace;
+    std::vector<TRI> tripletList_laplace_scalar;
 
     double pos_grad_coeff = 1.0 / std::pow(2.0 * dim, 2.0);
     double neg_grad_coeff = -1.0 / std::pow(2.0 * dim, 2.0);
@@ -234,10 +235,21 @@ void build_laplace_op() {
                 tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j+1, k), pos_grad_coeff));
                 tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k-1), pos_grad_coeff));
                 tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k+1), pos_grad_coeff));
+            
+                // Build the scalar version of the laplacian
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k), 6 * neg_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i-1, j, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j-1, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j+1, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k-1), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k+1), pos_grad_coeff));
             }
         }
     }
+
     laplace_operator.setFromTriplets(tripletList_laplace.begin(), tripletList_laplace.end());
+    laplace_operator_scalar.setFromTriplets(tripletList_laplace_scalar.begin(), tripletList_laplace_scalar.end());
 }
 
 void build_divergence_op() {

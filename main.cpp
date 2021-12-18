@@ -17,7 +17,7 @@ Eigen::VectorXd V_field_y;
 Eigen::VectorXd V_field_z;
 
 // User Tuned Parameters
-double dt = 0.01;  // time step
+double dt = 0.0005;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
@@ -32,6 +32,7 @@ double domain = dim;
 int dim3 = std::pow(dim, 3.0);
 
 Eigen::SparseMatrixd laplace_operator(3 * dim3, 3 * dim3);
+Eigen::SparseMatrixd laplace_operator_scalar(dim3, dim3);
 Eigen::SparseMatrixd divergence_operator(dim3, 3 * dim3);
 Eigen::SparseMatrixd gradient_operator(3 * dim3, dim3);
 

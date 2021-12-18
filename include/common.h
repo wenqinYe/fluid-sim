@@ -7,6 +7,7 @@ extern double domain;
 extern double viscosity;
 
 extern Eigen::SparseMatrixd laplace_operator;
+extern Eigen::SparseMatrixd laplace_operator_scalar;
 extern Eigen::SparseMatrixd divergence_operator;
 extern Eigen::SparseMatrixd gradient_operator;
 
