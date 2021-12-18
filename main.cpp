@@ -3,6 +3,7 @@
 #include <common.h>
 #include <visualization.h>
 #include <diffuse.h>
+#include <project.h>
 
 #include <cmath>
 #include <iostream>
@@ -117,15 +118,24 @@ bool simulation_callback() {
 
         /******** 4. Project ********/
 
+        Eigen::VectorXd V_field_x_4;
+        Eigen::VectorXd V_field_y_4;
+        Eigen::VectorXd V_field_z_4;
+
+        project( 
+            V_field_x_4, V_field_y_4, V_field_z_4,  // Output vector field
+            V_field_x_3, V_field_y_3, V_field_z_3  // Input vector field
+        );
+
 
         /******* Update Velocity fields with new values ********/
         // V_field_x = V_field_x_2;
         // V_field_y = V_field_y_2;
         // V_field_z = V_field_z_2;
 
-        V_field_x = V_field_x_3;
-        V_field_y = V_field_y_3;
-        V_field_z = V_field_z_3;
+        V_field_x = V_field_x_4;
+        V_field_y = V_field_y_4;
+        V_field_z = V_field_z_4;
 
         t += dt;
     }
