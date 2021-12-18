@@ -129,7 +129,7 @@ bool simulation_callback() {
 }
 
 bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
-    // viewer.data().clear();
+    viewer.data().clear();
 
     // Redraw the points on the visualization
     // viewer.data().clear();
@@ -138,8 +138,8 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 
     // Redraw the velocity field on the visualization
 
-    // if (show_v_field)
-    //     draw_vector_field();
+    if (show_v_field)
+        draw_vector_field();
 
 
     return false;

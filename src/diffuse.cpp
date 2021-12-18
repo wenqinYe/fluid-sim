@@ -25,34 +25,36 @@ void diffuse(
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
             for (int j = 1; j < dim - 1; j++) {
-                int row_ind = flat_index(i, j, k);
+                for (int comp = 0; comp < 3; comp++) {
+                    int row_ind = flat_index(i, j, k) + comp * dim3;
 
-                // Laplacian operator for x component of vector field
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k+1), pos_grad_coeff));
+                    // Laplacian operator for x component of vector field
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k), 6 * neg_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i-1, j, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j-1, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j+1, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k-1), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k+1), pos_grad_coeff));
 
-                // Laplacian operator for y component of vector field
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k+1), pos_grad_coeff));
+                    // Laplacian operator for y component of vector field
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i-1, j, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i+1, j, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j-1, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j+1, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k-1), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, dim3 + flat_index(i, j, k+1), pos_grad_coeff));
 
-                // Laplacian operator for z component of vector field
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k+1), pos_grad_coeff));
+                    // Laplacian operator for z component of vector field
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i-1, j, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i+1, j, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j-1, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j+1, k), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k-1), pos_grad_coeff));
+                    tripletList_laplace.push_back(TRI(row_ind, 2 * dim3 + flat_index(i, j, k+1), pos_grad_coeff));
+                }
             }
         }
     }
