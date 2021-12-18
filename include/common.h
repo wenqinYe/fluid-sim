@@ -5,7 +5,9 @@ extern int dim;
 extern int dim3;
 extern double domain;
 extern double viscosity;
+
 extern Eigen::SparseMatrixd laplace_operator;
+extern Eigen::SparseMatrixd divergence_operator;
 
 int flat_index(int i, int j, int k); 
 
@@ -24,3 +26,4 @@ void trilinear_interpolation(
 );
 
 void build_laplace_op();
+void build_divergence_op();

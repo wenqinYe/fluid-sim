@@ -17,7 +17,7 @@ Eigen::VectorXd V_field_y;
 Eigen::VectorXd V_field_z;
 
 // User Tuned Parameters
-double dt = 0.0001;  // time step
+double dt = 0.01;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
@@ -32,6 +32,7 @@ double domain = dim;
 int dim3 = std::pow(dim, 3.0);
 
 Eigen::SparseMatrixd laplace_operator(3 * dim3, 3 * dim3);
+Eigen::SparseMatrixd divergence_operator(dim3, 3 * dim3);
 
 void draw_vector_field() {
     for (int k = 0; k < dim; k++) {  // Put k on outside to optimize memory access of V_field
@@ -150,6 +151,7 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 int main(int argc, char **argv) {
     // Construct the laplace operator matrix
     build_laplace_op();
+    build_divergence_op();
 
     viz.core().background_color.setOnes();
 

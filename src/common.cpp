@@ -239,3 +239,30 @@ void build_laplace_op() {
     }
     laplace_operator.setFromTriplets(tripletList_laplace.begin(), tripletList_laplace.end());
 }
+
+void build_divergence_op() {
+    // Construct the divergence operator
+    typedef Eigen::Triplet<double> TRI;
+    std::vector<TRI> tripletList_divergence;
+
+    double pos_grad_coeff = 1.0 / (2.0 * dim);
+    double neg_grad_coeff = -1.0 / (2.0 * dim);
+
+    for (int k = 1; k < dim - 1; k++) {
+        for (int i = 1; i < dim - 1; i++) {
+            for (int j = 1; j < dim - 1; j++) {
+                int row_ind = flat_index(i, j, k);
+                
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i-1, j, k), neg_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
+                
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j-1, k) + dim3, neg_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j+1, k) + dim3, pos_grad_coeff));
+
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j, k-1) + 2 * dim3, neg_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j, k+1) + 2 * dim3, pos_grad_coeff));
+            }
+        }
+    }
+    divergence_operator.setFromTriplets(tripletList_divergence.begin(), tripletList_divergence.end());
+}
