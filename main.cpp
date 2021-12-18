@@ -33,6 +33,7 @@ int dim3 = std::pow(dim, 3.0);
 
 Eigen::SparseMatrixd laplace_operator(3 * dim3, 3 * dim3);
 Eigen::SparseMatrixd divergence_operator(dim3, 3 * dim3);
+Eigen::SparseMatrixd gradient_operator(3 * dim3, dim3);
 
 void draw_vector_field() {
     for (int k = 0; k < dim; k++) {  // Put k on outside to optimize memory access of V_field
@@ -152,6 +153,7 @@ int main(int argc, char **argv) {
     // Construct the laplace operator matrix
     build_laplace_op();
     build_divergence_op();
+    build_gradient_op();
 
     viz.core().background_color.setOnes();
 

@@ -266,3 +266,30 @@ void build_divergence_op() {
     }
     divergence_operator.setFromTriplets(tripletList_divergence.begin(), tripletList_divergence.end());
 }
+
+void build_gradient_op() {
+    // Construct the gradient operator
+    typedef Eigen::Triplet<double> TRI;
+    std::vector<TRI> tripletList_gradient;
+
+    double pos_grad_coeff = 1.0 / (2.0 * dim);
+    double neg_grad_coeff = -1.0 / (2.0 * dim);
+
+    for (int k = 1; k < dim - 1; k++) {
+        for (int i = 1; i < dim - 1; i++) {
+            for (int j = 1; j < dim - 1; j++) {
+                int row_ind = flat_index(i, j, k);
+
+                tripletList_gradient.push_back(TRI(row_ind, flat_index(i-1, j, k), neg_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
+                
+                tripletList_gradient.push_back(TRI(row_ind + dim3, flat_index(i, j-1, k), neg_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind + dim3, flat_index(i, j+1, k), pos_grad_coeff));
+
+                tripletList_gradient.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k-1), neg_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k+1), pos_grad_coeff));
+            }
+        }
+    }
+    gradient_operator.setFromTriplets(tripletList_gradient.begin(), tripletList_gradient.end());
+}
