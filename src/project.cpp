@@ -33,4 +33,6 @@ void project(
     V_field_x1 = new_global_field.segment(0, dim3);
     V_field_y1 = new_global_field.segment(dim3, dim3);
     V_field_z1 = new_global_field.segment(2 * dim3, dim3);
+
+    apply_fixed_boundary_constraint(V_field_x1, V_field_y1, V_field_z1);
 }
