@@ -70,13 +70,13 @@ bool simulation_callback() {
         }
 
         // add an upwards force of 1 to all the cells on the x,y plane
-        // for (int i = 1; i < dim-1; i++) {
-        //     for (int j = 1; j < dim-1; j++) {
-        //         f_x(flat_index(i, j, 1)) = 1;
-        //         f_y(flat_index(i, j, 1)) = 1;
-        //         f_z(flat_index(i, j, 1)) = 1;
-        //     }
-        // }
+        for (int i = 1; i < dim-1; i++) {
+            for (int j = 1; j < dim-1; j++) {
+                f_x(flat_index(i, j, 1)) = 1;
+                f_y(flat_index(i, j, 1)) = 1;
+                f_z(flat_index(i, j, 1)) = 1;
+            }
+        }
 
         add_force(V_field_x_1, V_field_x, f_x, dt);
         add_force(V_field_y_1, V_field_y, f_y, dt);
