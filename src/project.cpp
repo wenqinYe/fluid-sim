@@ -15,7 +15,7 @@ void project(
 
     Eigen::VectorXd divW3 = divergence_operator * global_field;
     
-    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> solver;
+    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> solver;
     solver.compute(laplace_operator_scalar);
 
     Eigen::VectorXd q(dim3);

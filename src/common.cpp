@@ -204,8 +204,8 @@ void build_laplace_op() {
 
     double voxel_dim = domain/(double)dim;
 
-    double pos_grad_coeff = 1.0 / std::pow(2.0 * voxel_dim, 2.0);
-    double neg_grad_coeff = -1.0 / std::pow(2.0 * voxel_dim, 2.0);
+    double pos_grad_coeff = 1.0 / std::pow(voxel_dim, 2.0);
+    double neg_grad_coeff = -1.0 / std::pow(voxel_dim, 2.0);
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {

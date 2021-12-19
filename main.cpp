@@ -18,7 +18,7 @@ Eigen::VectorXd V_field_y;
 Eigen::VectorXd V_field_z;
 
 // User Tuned Parameters
-double dt = 0.005;  // time step
+double dt = 0.01;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
@@ -61,7 +61,7 @@ void draw_vector_field() {
 }
 
 bool simulation_callback() {
-    while (simulating) {
+    while (simulating && t < dt * 10000) {
         // std::cout << "----------------------- ITER -----------------------" << std::endl;
         // P =  Eigen::MatrixXd::Random(100000,3);
 
@@ -83,7 +83,7 @@ bool simulation_callback() {
         for (int i = 1; i < dim-1; i++) {
             for (int j = 1; j < dim-1; j++) {
                 f_x(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
-                f_y(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
+                f_y(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
                 f_z(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
             }
         }
@@ -95,9 +95,9 @@ bool simulation_callback() {
         apply_fixed_boundary_constraint(V_field_x_1, V_field_y_1, V_field_z_1);
 
         /******** 2. Advect ********/
-        Eigen::VectorXd V_field_x_2;
-        Eigen::VectorXd V_field_y_2;
-        Eigen::VectorXd V_field_z_2;
+        Eigen::VectorXd V_field_x_2 = V_field_x_1;
+        Eigen::VectorXd V_field_y_2 = V_field_y_1;
+        Eigen::VectorXd V_field_z_2 = V_field_z_1;
 
         advect(
             V_field_x_2, V_field_y_2, V_field_z_2,  // Output vector field
@@ -129,10 +129,6 @@ bool simulation_callback() {
 
 
         /******* Update Velocity fields with new values ********/
-        // V_field_x = V_field_x_2;
-        // V_field_y = V_field_y_2;
-        // V_field_z = V_field_z_2;
-
         V_field_x = V_field_x_4;
         V_field_y = V_field_y_4;
         V_field_z = V_field_z_4;
@@ -195,7 +191,6 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dim; j++) {
             for (int k = 0; k < dim; k++) {
                 int flat = flat_index(i, j, k);
-
                 double x = -1 * (dim / 2) + i;
                 double y = -1 * (dim / 2) + j;
                 double z = -1 * (dim / 2) + k;
@@ -204,6 +199,7 @@ int main(int argc, char **argv) {
                     V_field_x(flat) = x / denom;
                     V_field_y(flat) = y / denom;
                     V_field_z(flat) = z / denom;
+                    
                 } else {
                     V_field_x(flat) = 0;
                     V_field_y(flat) = 0;
@@ -212,14 +208,10 @@ int main(int argc, char **argv) {
             }
         }
     }
+    apply_fixed_boundary_constraint(
+        V_field_x, V_field_y, V_field_z
+    );
 
-    // for (int i = 1; i < dim-1; i++) {
-    //     for (int j = 1; j < dim-1; j++) {
-    //         V_field_x(flat_index(i, j, 1)) = 0;
-    //         V_field_y(flat_index(i, j, 1)) = 0;
-    //         V_field_z(flat_index(i, j, 1)) = 1;
-    //     }
-    // }
 
     // Show the velocity_field in the visualizaiton
     //

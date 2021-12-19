@@ -31,19 +31,17 @@ void advect(
                 // Start with simple euler (TODO: update to use RK2)
                 Eigen::Vector3d velocity(V_field_x0(index), V_field_y0(index), V_field_z0(index));
                 Eigen::Vector3d backtraced_pos = position - dt * velocity;
-
-                // printf("backtraced pos (%f %f %f) | original pos (%f %f %f)\n",
-                //     backtraced_pos(0), backtraced_pos(1), backtraced_pos(2),
-                //     position(0), position(1), position(2));
+                // Eigen::Vector3d velocity(V_field_x0(index), V_field_y0(index), V_field_z0(index));
+                // Eigen::Vector3d k1 = -1 * dt * velocity;
+                // Eigen::Vector3d velocity2;
+                // Eigen::Vector3d pos2 = position + k1;
+                // trilinear_interpolation(velocity2, pos2, V_field_x0, V_field_y0, V_field_z0);
+                // Eigen::Vector3d k2 = -1 * dt * velocity2;
+                // Eigen::Vector3d backtraced_pos = position + (0.5) * (k1 + k2);
 
                 // Interpolate to get new velsocity value
                 Eigen::Vector3d new_velocity;
                 trilinear_interpolation(new_velocity, backtraced_pos, V_field_x0, V_field_y0, V_field_z0);
-
-                // printf("==============new_velocity: (%f, %f, %f) -> (%d, %d %d) | old velocity (%f, %f, %f)\n",
-                //     new_velocity(0), new_velocity(1), new_velocity(2),
-                //     i, j, k,
-                //     velocity(0), velocity(1), velocity(2));
 
                 V_field_x1(index) = new_velocity(0);
                 V_field_y1(index) = new_velocity(1);
