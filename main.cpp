@@ -17,6 +17,9 @@ Eigen::VectorXd V_field_x;
 Eigen::VectorXd V_field_y;
 Eigen::VectorXd V_field_z;
 
+// The scalar field
+Eigen::VectorXd P_field;
+
 // User Tuned Parameters
 double dt = 0.01;  // time step
 bool simulating = true;
@@ -25,7 +28,8 @@ bool simulating = true;
 int dim = 9;
 bool show_v_field = true;
 double viscosity = 1.0;
-
+double diffusion = 1.0;
+double dissipation = 1.0;
 
 // Non-User Tuned
 double t = 0;         // simulation time
@@ -34,6 +38,7 @@ int dim3 = std::pow(dim, 3.0);
 
 Eigen::SparseMatrixd laplace_operator(3 * dim3, 3 * dim3);
 Eigen::SparseMatrixd laplace_operator_scalar(dim3, dim3);
+
 Eigen::SparseMatrixd divergence_operator(dim3, 3 * dim3);
 Eigen::SparseMatrixd gradient_operator(3 * dim3, dim3);
 
