@@ -202,8 +202,10 @@ void build_laplace_op() {
     std::vector<TRI> tripletList_laplace;
     std::vector<TRI> tripletList_laplace_scalar;
 
-    double pos_grad_coeff = 1.0 / std::pow(2.0 * dim, 2.0);
-    double neg_grad_coeff = -1.0 / std::pow(2.0 * dim, 2.0);
+    double voxel_dim = domain/(double)dim;
+
+    double pos_grad_coeff = 1.0 / std::pow(2.0 * voxel_dim, 2.0);
+    double neg_grad_coeff = -1.0 / std::pow(2.0 * voxel_dim, 2.0);
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
@@ -257,8 +259,10 @@ void build_divergence_op() {
     typedef Eigen::Triplet<double> TRI;
     std::vector<TRI> tripletList_divergence;
 
-    double pos_grad_coeff = 1.0 / (2.0 * dim);
-    double neg_grad_coeff = -1.0 / (2.0 * dim);
+    double voxel_dim = domain/(double)dim;
+
+    double pos_grad_coeff = 1.0 / (2.0 * voxel_dim);
+    double neg_grad_coeff = -1.0 / (2.0 * voxel_dim);
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
@@ -284,8 +288,10 @@ void build_gradient_op() {
     typedef Eigen::Triplet<double> TRI;
     std::vector<TRI> tripletList_gradient;
 
-    double pos_grad_coeff = 1.0 / (2.0 * dim);
-    double neg_grad_coeff = -1.0 / (2.0 * dim);
+    double voxel_dim = domain/(double)dim;
+
+    double pos_grad_coeff = 1.0 / (2.0 * voxel_dim);
+    double neg_grad_coeff = -1.0 / (2.0 * voxel_dim);
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
