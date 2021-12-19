@@ -39,3 +39,22 @@ void diffuse(
 
     apply_fixed_boundary_constraint(V_field_x1, V_field_y1, V_field_z1); 
 }
+
+void diffuse_scalar(Eigen::VectorXd &w1, Eigen::VectorXd &w0, double dt){
+    // Construct sparse identity matrix
+    Eigen::SparseMatrixd identity(dim3, dim3);
+    identity.setIdentity();
+
+    // Create the diffusion operator and then solve for the new velocity field
+    Eigen::SparseMatrixd A = identity - viscosity * dt * laplace_operator_scalar;
+
+    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> solver;
+    solver.compute(A);
+
+    w1 = solver.solve(w0);
+
+    if(solver.info()!=Eigen::Success) {
+        std::cout << "solving failed in diffusion" << std::endl;
+        return;
+    }
+}
