@@ -21,13 +21,13 @@ Eigen::VectorXd V_field_z;
 Eigen::VectorXd S_field;
 
 // User Tuned Parameters
-double dt = 0.01;  // time step
+double dt = 0.001;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
 int dim = 9;
 bool show_v_field = true;
-bool show_s_field = true;
+bool show_s_field = false;
 
 double viscosity = 1.0;
 double diffusion = 1.0;
@@ -44,6 +44,16 @@ Eigen::SparseMatrixd laplace_operator_scalar(dim3, dim3);
 Eigen::SparseMatrixd divergence_operator(dim3, 3 * dim3);
 Eigen::SparseMatrixd gradient_operator(3 * dim3, dim3);
 
+int p00;
+int p01;
+int p02;
+int p10;
+int p11;
+int p12;
+int p20;
+int p21;
+int p22;
+
 void vstep() {
     /******** 1. Apply forces ********/
     Eigen::VectorXd V_field_x_1;
@@ -58,15 +68,25 @@ void vstep() {
     f_y.setZero();
     f_z.setZero();
 
-    // add an upwards force of 1 to all the cells on the x,y plane
-    // and decay it by 1/(t+1)
-    for (int i = 1; i < dim-1; i++) {
-        for (int j = 1; j < dim-1; j++) {
-            f_x(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
-            f_y(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
-            f_z(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
-        }
-    }
+    f_x(p00) = 1;
+    f_x(p01) = 1;
+    f_x(p02) = 1;
+    f_x(p10) = 1;
+    f_x(p11) = 1;
+    f_x(p12) = 1;
+    f_x(p20) = 1;
+    f_x(p21) = 1;
+    f_x(p22) = 1;
+
+    // // add an upwards force of 1 to all the cells on the x,y plane
+    // // and decay it by 1/(t+1)
+    // for (int i = 1; i < dim-1; i++) {
+    //     for (int j = 1; j < dim-1; j++) {
+    //         f_x(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
+    //         f_y(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
+    //         f_z(flat_index(i, j, 1)) = 1 * 1.0/(t+1.0);
+    //     }
+    // }
 
     add_force(V_field_x_1, V_field_x, f_x, dt);
     add_force(V_field_y_1, V_field_y, f_y, dt);
@@ -100,6 +120,10 @@ void vstep() {
     Eigen::VectorXd V_field_x_4;
     Eigen::VectorXd V_field_y_4;
     Eigen::VectorXd V_field_z_4;
+
+    // V_field_x_4 = V_field_x_3; 
+    // V_field_y_4 = V_field_y_3;
+    // V_field_z_4 = V_field_z_3;
 
     project( 
         V_field_x_4, V_field_y_4, V_field_z_4,  // Output vector field
@@ -157,7 +181,7 @@ void draw_vector_field() {
 
                 Eigen::RowVector3d V_magnitude_vector(V_field_x(flat), V_field_y(flat), V_field_z(flat));
                 V_magnitude_vector = V_magnitude_vector / V_magnitude_vector.norm();
-                V_magnitude_vector *= 0.5;
+                V_magnitude_vector *= 0.25;
 
                 Eigen::RowVector3d V1((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
                 Eigen::RowVector3d V2 = V1 + V_magnitude_vector;
@@ -166,16 +190,30 @@ void draw_vector_field() {
                 Eigen::RowVector3d offset;
                 offset << half_dim, half_dim, half_dim;
 
-                viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0, 0, 0));
+                if (flat == p00 || flat == p01 || flat == p02 || flat == p10 || flat == p11 || flat == p12 || flat == p20 || flat == p21 || flat == p22) {
+                    viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(255, 0, 0));
+                    viz.data().point_size = 5;
+                    viz.data().add_points(V1 - offset, Eigen::RowVector3d(255, 0, 0));
+                }
+                else {
+                    viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0, 0, 0));
+                    viz.data().point_size = 5;
+                    viz.data().add_points(V1 - offset, Eigen::RowVector3d(0, 0, 0));
+                }
             }
         }
     }
 }
 
+void draw_scalar_field() {
+    
+}
+
 bool simulation_callback() {
     while (simulating && t < dt * 10000) {
         vstep();
-        sstep();
+        if (show_s_field)
+            sstep();
         t += dt;
     }
 
@@ -194,12 +232,25 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
 
     if (show_v_field)
         draw_vector_field();
+    if (show_s_field)
+        draw_scalar_field();
 
 
     return false;
 }
 
 int main(int argc, char **argv) {
+
+    p00 = flat_index((int)(dim / 2)-1, (int)(dim / 2)-1, dim-1);
+    p01 = flat_index((int)(dim / 2)-1, (int)(dim / 2), dim-1);
+    p02 = flat_index((int)(dim / 2)-1, (int)(dim / 2)+1, dim-1);
+    p10 = flat_index((int)(dim / 2)+0, (int)(dim / 2)-1, dim-1);
+    p11 = flat_index((int)(dim / 2)+0, (int)(dim / 2), dim-1);
+    p12 = flat_index((int)(dim / 2)+0, (int)(dim / 2)+1, dim-1);
+    p20 = flat_index((int)(dim / 2)+1, (int)(dim / 2)-1, dim-1);
+    p21 = flat_index((int)(dim / 2)+1, (int)(dim / 2), dim-1);
+    p22 = flat_index((int)(dim / 2)+1, (int)(dim / 2)+1, dim-1);
+
     // Construct the laplace operator matrix
     build_laplace_op();
     build_divergence_op();
@@ -231,24 +282,34 @@ int main(int argc, char **argv) {
 
     // This creates a velocity field that initially has vectors moving out from some central point
     // (like an explosion from a central point)
+    // for (int i = 0; i < dim; i++) {
+    //     for (int j = 0; j < dim; j++) {
+    //         for (int k = 0; k < dim; k++) {
+    //             int flat = flat_index(i, j, k);
+    //             double x = -1 * (dim / 2) + i;
+    //             double y = -1 * (dim / 2) + j;
+    //             double z = -1 * (dim / 2) + k;
+    //             double denom = std::pow(x, 2.0) + std::pow(y, 2.0) + std::pow(z, 2.0);
+    //             if (denom != 0) {
+    //                 V_field_x(flat) = x / denom;
+    //                 V_field_y(flat) = y / denom;
+    //                 V_field_z(flat) = z / denom;
+                    
+    //             } else {
+    //                 V_field_x(flat) = 0;
+    //                 V_field_y(flat) = 0;
+    //                 V_field_z(flat) = 0;
+    //             }
+    //         }
+    //     }
+    // }
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             for (int k = 0; k < dim; k++) {
                 int flat = flat_index(i, j, k);
-                double x = -1 * (dim / 2) + i;
-                double y = -1 * (dim / 2) + j;
-                double z = -1 * (dim / 2) + k;
-                double denom = std::pow(x, 2.0) + std::pow(y, 2.0) + std::pow(z, 2.0);
-                if (denom != 0) {
-                    V_field_x(flat) = x / denom;
-                    V_field_y(flat) = y / denom;
-                    V_field_z(flat) = z / denom;
-                    
-                } else {
-                    V_field_x(flat) = 0;
-                    V_field_y(flat) = 0;
-                    V_field_z(flat) = 0;
-                }
+                V_field_x(flat) = 0;
+                V_field_y(flat) = 0.001;
+                V_field_z(flat) = 0;
             }
         }
     }
@@ -270,6 +331,9 @@ int main(int argc, char **argv) {
     // +-----------> i
     if (show_v_field)
         draw_vector_field();
+
+    if (show_s_field)
+        draw_scalar_field();
 
     /******** Start simulation on background thread ********/
     std::thread simulation_thread(simulation_callback);
