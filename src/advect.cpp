@@ -52,7 +52,7 @@ void advect_scalar(
     Eigen::VectorXd &V_field_x0, Eigen::VectorXd &V_field_y0, Eigen::VectorXd &V_field_z0, // Input vector field
     double dt
 ) {
-    p_field_out = Eigen::Vector3d(p_field_in.size());
+    p_field_out = Eigen::VectorXd(p_field_in.size());
     double voxel_dim = domain / (double)dim;
     double half_voxel_dim = voxel_dim / 2.0;
 
