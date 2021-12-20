@@ -115,11 +115,11 @@ bool simulation_callback() {
         Eigen::VectorXd V_field_y_3;
         Eigen::VectorXd V_field_z_3;
 
-        diffuse( 
-            V_field_x_3, V_field_y_3, V_field_z_3,  // Output vector field
-            V_field_x_2, V_field_y_2, V_field_z_2,  // Input vector field
-            dt
-        );
+        diffuse_scalar(V_field_x_3, V_field_x_2, dt);
+        diffuse_scalar(V_field_y_3, V_field_y_2, dt);
+        diffuse_scalar(V_field_z_3, V_field_z_2, dt);
+        
+        apply_fixed_boundary_constraint(V_field_x_3, V_field_y_3, V_field_z_3); 
 
         /******** 4. Project ********/
 
