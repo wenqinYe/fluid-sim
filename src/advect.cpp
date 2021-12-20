@@ -14,13 +14,13 @@ void advect(
     V_field_x1 = Eigen::VectorXd(V_field_x0.size());
     V_field_y1 = Eigen::VectorXd(V_field_y0.size());
     V_field_z1 = Eigen::VectorXd(V_field_z0.size());
+    double voxel_dim = domain / (double)dim;
+    double half_voxel_dim = voxel_dim / 2.0;
 
     for (int k = 1; k < dim - 1; k++) {
         for (int i = 1; i < dim - 1; i++) {
             for (int j = 1; j < dim - 1; j++) {
                 int index = flat_index(i, j, k);
-                double voxel_dim = domain / (double)dim;  // ! Isnt this just 1/1?
-                double half_voxel_dim = voxel_dim / 2.0;
 
                 // Position represents the center of the voxel
                 Eigen::Vector3d position(
@@ -31,13 +31,6 @@ void advect(
                 // Start with simple euler (TODO: update to use RK2)
                 Eigen::Vector3d velocity(V_field_x0(index), V_field_y0(index), V_field_z0(index));
                 Eigen::Vector3d backtraced_pos = position - dt * velocity;
-                // Eigen::Vector3d velocity(V_field_x0(index), V_field_y0(index), V_field_z0(index));
-                // Eigen::Vector3d k1 = -1 * dt * velocity;
-                // Eigen::Vector3d velocity2;
-                // Eigen::Vector3d pos2 = position + k1;
-                // trilinear_interpolation(velocity2, pos2, V_field_x0, V_field_y0, V_field_z0);
-                // Eigen::Vector3d k2 = -1 * dt * velocity2;
-                // Eigen::Vector3d backtraced_pos = position + (0.5) * (k1 + k2);
 
                 // Interpolate to get new velsocity value
                 Eigen::Vector3d new_velocity;
@@ -51,4 +44,40 @@ void advect(
     }
 
     apply_fixed_boundary_constraint(V_field_x1, V_field_y1, V_field_z1);
+}
+
+void advect_scalar(
+    Eigen::VectorXd &p_field_out, // Output vector field
+    Eigen::VectorXd &p_field_in,
+    Eigen::VectorXd &V_field_x0, Eigen::VectorXd &V_field_y0, Eigen::VectorXd &V_field_z0, // Input vector field
+    double dt
+) {
+    p_field_out = Eigen::Vector3d(p_field_in.size());
+    double voxel_dim = domain / (double)dim;
+    double half_voxel_dim = voxel_dim / 2.0;
+
+    for (int k = 1; k < dim - 1; k++) {
+        for (int i = 1; i < dim - 1; i++) {
+            for (int j = 1; j < dim - 1; j++) {
+                int index = flat_index(i, j, k);
+
+                // Position represents the center of the voxel
+                Eigen::Vector3d position(
+                    voxel_dim * (double)i + half_voxel_dim,
+                    voxel_dim * (double)j + half_voxel_dim,
+                    voxel_dim * (double)k + half_voxel_dim);
+
+                // Start with simple euler (TODO: update to use RK2)
+                Eigen::Vector3d velocity(V_field_x0(index), V_field_y0(index), V_field_z0(index));
+                Eigen::Vector3d backtraced_pos = position - dt * velocity;
+
+                // Interpolate to get new velsocity value
+                double new_scalar;
+                trilinear_interpolation_scalar(new_scalar, backtraced_pos, p_field_in);
+
+                p_field_out(index) = new_scalar;
+            }
+        }
+    }
+    apply_fixed_boundary_constraint_scalar(p_field_out);
 }

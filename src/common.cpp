@@ -9,7 +9,6 @@ void apply_fixed_boundary_constraint(
     Eigen::VectorXd &V_field_y, 
     Eigen::VectorXd &V_field_z
 ) {
-
     // Wall where k is 0
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
@@ -63,63 +62,50 @@ void apply_fixed_boundary_constraint(
             V_field_z(flat_index(dim-1, j, k)) = -1 * V_field_z(flat_index(dim-2, j, k));
         }
     }
+}
 
-    // The idea here is on the walls, set the field value to be the same as the feild value
-    // just outside of that wall (with the relevant normal component zeroed out)
-    
-    // // Wall where k is 0
-    // for (int i = 0; i < dim; i++) {
-    //     for (int j = 0; j < dim; j++) {
-    //         V_field_x(flat_index(i, j, 0)) = V_field_x(flat_index(i, j, 1));
-    //         V_field_y(flat_index(i, j, 0)) = V_field_y(flat_index(i, j, 1));
-    //         V_field_z(flat_index(i, j, 0)) = 0;
-    //     }
-    // }
+void apply_fixed_boundary_constraint_scalar(Eigen::VectorXd &P_field) {
+    // Wall where k is 0
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            P_field(flat_index(i, j, 0)) = P_field(flat_index(i, j, 1));
+        }
+    }
 
-    // // Wall where k is dim - 1
-    // for (int i = 0; i < dim; i++) {
-    //     for (int j = 0; j < dim; j++) {
-    //         V_field_x(flat_index(i, j, dim-1)) = V_field_x(flat_index(i, j, dim-2));
-    //         V_field_y(flat_index(i, j, dim-1)) = V_field_y(flat_index(i, j, dim-2));
-    //         V_field_z(flat_index(i, j, dim-1)) = 0;
-    //     }
-    // }
+    // Wall where k is dim - 1
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            P_field(flat_index(i, j, dim-1)) = P_field(flat_index(i, j, dim-2));
+        }
+    }
 
-    // // Wall where j is 0
-    // for (int i = 0; i < dim; i++) {
-    //     for (int k = 0; k < dim; k++) {
-    //         V_field_x(flat_index(i, 0, k)) = V_field_x(flat_index(i, 1, k));
-    //         V_field_y(flat_index(i, 0, k)) = 0;
-    //         V_field_z(flat_index(i, 0, k)) = V_field_z(flat_index(i, 1, k));
-    //     }
-    // }
+    // Wall where j is 0
+    for (int i = 0; i < dim; i++) {
+        for (int k = 0; k < dim; k++) {
+            P_field(flat_index(i, 0, k)) = P_field(flat_index(i, 1, k));
+        }
+    }
 
-    // // Wall where j is dim-1
-    // for (int i = 0; i < dim; i++) {
-    //     for (int k = 0; k < dim; k++) {
-    //         V_field_x(flat_index(i, dim-1, k)) = V_field_x(flat_index(i, dim-2, k));
-    //         V_field_y(flat_index(i, dim-1, k)) = 0;
-    //         V_field_z(flat_index(i, dim-1, k)) = V_field_z(flat_index(i, dim-2, k));
-    //     }
-    // }
+    // Wall where j is dim-1
+    for (int i = 0; i < dim; i++) {
+        for (int k = 0; k < dim; k++) {
+            P_field(flat_index(i, dim-1, k)) = P_field(flat_index(i, dim-2, k));
+        }
+    }
 
-    // // Wall where i is 0
-    // for (int j = 0; j < dim; j++) {
-    //     for (int k = 0; k < dim; k++) {
-    //         V_field_x(flat_index(0, j, k)) = 0;
-    //         V_field_y(flat_index(0, j, k)) = V_field_y(flat_index(1, j, k));
-    //         V_field_z(flat_index(0, j, k)) = V_field_z(flat_index(1, j, k));
-    //     }
-    // }
+    // Wall where i is 0
+    for (int j = 0; j < dim; j++) {
+        for (int k = 0; k < dim; k++) {
+            P_field(flat_index(0, j, k)) = P_field(flat_index(1, j, k));
+        }
+    }
 
-    // // Wall where i is dim-1
-    // for (int j = 0; j < dim; j++) {
-    //     for (int k = 0; k < dim; k++) {
-    //         V_field_x(flat_index(dim-1, j, k)) = 0;
-    //         V_field_y(flat_index(dim-1, j, k)) = V_field_y(flat_index(dim-2, j, k));
-    //         V_field_z(flat_index(dim-1, j, k)) = V_field_z(flat_index(dim-2, j, k));
-    //     }
-    // }
+    // Wall where i is dim-1
+    for (int j = 0; j < dim; j++) {
+        for (int k = 0; k < dim; k++) {
+            P_field(flat_index(dim-1, j, k)) = P_field(flat_index(dim-2, j, k));
+        }
+    }
 }
 
 void trilinear_interpolation(
@@ -194,6 +180,78 @@ void trilinear_interpolation(
     Eigen::Vector3d c1 = c01 * (1-y_diff) + c11 * y_diff;
 
     result = c0 * (1-z_diff) + c1 * z_diff; 
+}
+
+void trilinear_interpolation_scalar(
+    double &result,
+    Eigen::Vector3d &position, // not index positions, but the actual position in 3d space 
+    Eigen::VectorXd &field
+) {
+    double voxel_dim = domain/(double)dim;
+
+    // Constrain it so that we are not doing interpolation on the outer edges
+    Eigen::Vector3d pos = position;
+
+    // Get the indices for the closest cells
+    double x = (pos(0) - voxel_dim/2.0)/voxel_dim;
+    double y = (pos(1) - voxel_dim/2.0)/voxel_dim;
+    double z = (pos(2) - voxel_dim/2.0)/voxel_dim;
+
+    double max_idx = dim - 2;
+    x = std::max(1.0, x);
+    x = std::min(max_idx, x);
+    y = std::max(1.0, y);
+    y = std::min(max_idx, y);
+    z = std::max(1.0, z);
+    z = std::min(max_idx, z);
+
+    double x_floor = std::floor(x);
+    double y_floor = std::floor(y);
+    double z_floor = std::floor(z);
+
+    double x_ceil = x_floor + 1;
+    double y_ceil = y_floor + 1;
+    double z_ceil = z_floor + 1;
+
+    double x_diff = (x - x_floor) / (x_ceil - x_floor);
+    double y_diff = (y - y_floor) / (y_ceil - y_floor);
+    double z_diff = (z - z_floor) / (z_ceil - z_floor);
+
+    // Get the field values for the 8 cells that are close to the passed in pos
+    int idx = flat_index(x_floor, y_floor, z_floor);
+    double c000 = field(idx);
+
+    idx = flat_index(x_ceil, y_floor, z_floor);
+    double c100 = field(idx);
+
+    idx = flat_index(x_floor, y_ceil, z_floor);
+    double c010 = field(idx);
+
+    idx = flat_index(x_ceil, y_ceil, z_floor);
+    double c110 = field(idx);
+
+    idx = flat_index(x_floor, y_floor, z_ceil);
+    double c001 = field(idx);
+
+    idx = flat_index(x_ceil, y_floor, z_ceil);
+    double c101 = field(idx);
+
+    idx = flat_index(x_floor, y_ceil, z_ceil);
+    double c011 = field(idx);
+
+    idx = flat_index(x_ceil, y_ceil, z_ceil);
+    double c111 = field(idx);
+
+    // Do the trilinear interpolation
+    double c00 = c000 * (1-x_diff) + c100 * x_diff;
+    double c01 = c001 * (1-x_diff) + c101 * x_diff;
+    double c10 = c010 * (1-x_diff) + c110 * x_diff;
+    double c11 = c011 * (1-x_diff) + c111 * x_diff;
+
+    double c0 = c00 * (1-y_diff) + c10 * y_diff;
+    double c1 = c01 * (1-y_diff) + c11 * y_diff;
+
+    result = c0 * (1-z_diff) + c1 * z_diff;
 }
 
 void build_laplace_op() {

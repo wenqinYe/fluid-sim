@@ -19,12 +19,22 @@ void apply_fixed_boundary_constraint(
     Eigen::VectorXd &V_field_z
 ); 
 
+void apply_fixed_boundary_constraint_scalar(
+    Eigen::VectorXd &P_field
+); 
+
 void trilinear_interpolation(
     Eigen::Vector3d &result,
     Eigen::Vector3d &position, // not index positions, but the actual position in 3d space 
     Eigen::VectorXd &V_field_x0, 
     Eigen::VectorXd &V_field_y0, 
     Eigen::VectorXd &V_field_z0
+);
+
+void trilinear_interpolation_scalar(
+    double &result,
+    Eigen::Vector3d &position, // not index positions, but the actual position in 3d space 
+    Eigen::VectorXd &field
 );
 
 void build_laplace_op();
