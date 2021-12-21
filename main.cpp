@@ -254,12 +254,6 @@ void draw_scalar_field(igl::opengl::glfw::Viewer &viewer) {
 
                 C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
                 curr += 1;
-                continue;
-
-                viewer.core().lighting_factor = 0;
-                viewer.data_list[curr].set_colors(color);
-                viewer.data_list[curr].show_lines = false;
-                curr += 1;
             }
         }
     }
