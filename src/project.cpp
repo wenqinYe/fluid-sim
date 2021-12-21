@@ -14,14 +14,11 @@ void project(
     global_field << V_field_x0, V_field_y0, V_field_z0;
 
     Eigen::VectorXd divW3 = divergence_operator * global_field;
-    
-    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> solver;
-    solver.compute(laplace_operator_scalar);
 
     Eigen::VectorXd q(dim3);
-    q = solver.solve(divW3);
+    q = laplace_solver_scalar.solve(divW3);
 
-    if(solver.info()!=Eigen::Success) {
+    if(laplace_solver_scalar.info()!=Eigen::Success) {
         std::cout << "solving failed in projection" << std::endl;
         return;
     }

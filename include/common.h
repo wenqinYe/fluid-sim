@@ -11,6 +11,13 @@ extern Eigen::SparseMatrixd laplace_operator_scalar;
 extern Eigen::SparseMatrixd divergence_operator;
 extern Eigen::SparseMatrixd gradient_operator;
 
+extern Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> diffusion_solver;
+extern Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> diffusion_solver_scalar;
+extern Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> laplace_solver_scalar;
+extern Eigen::SparseMatrixd diffusion_mat;
+extern Eigen::SparseMatrixd diffusion_mat_scalar;
+
+
 int flat_index(int i, int j, int k); 
 
 void apply_fixed_boundary_constraint(
@@ -40,3 +47,4 @@ void trilinear_interpolation_scalar(
 void build_laplace_op();
 void build_divergence_op();
 void build_gradient_op();
+void compute_solvers(double dt, double diffusion);

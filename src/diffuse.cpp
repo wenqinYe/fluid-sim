@@ -15,20 +15,11 @@ void diffuse(
     Eigen::VectorXd global_field(3 * dim3);
     global_field << V_field_x0, V_field_y0, V_field_z0;
 
-    // Construct sparse identity matrix
-    Eigen::SparseMatrixd identity(3 * dim3, 3 * dim3);
-    identity.setIdentity();
-
-    // Create the diffusion operator and then solve for the new velocity field
-    Eigen::SparseMatrixd A = identity - diffusion * dt * laplace_operator;
-
-    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> solver;
-    solver.compute(A);
 
     Eigen::VectorXd new_global_field(3 * dim3);
-    new_global_field = solver.solve(global_field);
+    new_global_field = diffusion_solver.solve(global_field);
 
-    if(solver.info()!=Eigen::Success) {
+    if(diffusion_solver.info()!=Eigen::Success) {
         std::cout << "solving failed in diffusion" << std::endl;
         return;
     }
@@ -42,19 +33,10 @@ void diffuse(
 }
 
 void diffuse_scalar(Eigen::VectorXd &w1, Eigen::VectorXd &w0, double dt, double diffusion){
-    // Construct sparse identity matrix
-    Eigen::SparseMatrixd identity(dim3, dim3);
-    identity.setIdentity();
 
-    // Create the diffusion operator and then solve for the new velocity field
-    Eigen::SparseMatrixd A = identity - diffusion * dt * laplace_operator_scalar;
+    w1 = diffusion_solver_scalar.solve(w0);
 
-    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower> solver;
-    solver.compute(A);
-
-    w1 = solver.solve(w0);
-
-    if(solver.info()!=Eigen::Success) {
+    if(diffusion_solver.info()!=Eigen::Success) {
         std::cout << "solving failed in diffusion" << std::endl;
         return;
     }

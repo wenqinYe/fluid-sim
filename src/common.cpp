@@ -369,3 +369,22 @@ void build_gradient_op() {
     }
     gradient_operator.setFromTriplets(tripletList_gradient.begin(), tripletList_gradient.end());
 }
+
+void compute_solvers(double dt, double diffusion) {
+    /******** Compute the solver for the diffusion step ********/
+    Eigen::SparseMatrixd identity(3 * dim3, 3 * dim3);
+    identity.setIdentity();
+
+    diffusion_mat = identity - diffusion * dt * laplace_operator;
+
+    diffusion_solver.compute(diffusion_mat);
+
+    /******* Compute the laplace operator solver (scalar field version) *********/
+
+    diffusion_mat_scalar = identity - diffusion * dt * laplace_operator_scalar;
+
+    diffusion_solver_scalar.compute(diffusion_mat_scalar);
+
+    /******** Compute the lapalce operator solver (vector field version) ********/
+    laplace_solver_scalar.compute(laplace_operator_scalar);
+}
