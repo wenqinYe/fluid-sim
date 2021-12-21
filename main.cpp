@@ -100,9 +100,9 @@ void vstep() {
     // and decay it by 1/(t+1)
     for (int i = 1; i < dim-1; i++) {
         for (int j = 1; j < dim-1; j++) {
-            f_x(flat_index(i, j, dim/2)) = 0 * 1.0/(t+1.0);
-            f_y(flat_index(i, j, dim/2)) = 0/(t+1.0);
-            f_z(flat_index(i, j, dim/2)) = 30.0 * 1.0/(t+1.0);
+            f_x(flat_index(i, j, 1)) = 0 * 1.0/(t+1.0);
+            f_y(flat_index(i, j, 1)) = 0/(t+1.0);
+            f_z(flat_index(i, j, 1)) = 2.0 * 1.0/(t+1.0);
         }
     }
 
