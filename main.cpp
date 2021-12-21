@@ -415,7 +415,7 @@ int main(int argc, char **argv) {
     std::thread simulation_thread(simulation_callback);
     simulation_thread.detach();
 
-
+    viz.core().is_animating = true;
     viz.launch();
     return 1;
 }
