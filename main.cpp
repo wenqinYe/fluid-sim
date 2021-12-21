@@ -38,7 +38,7 @@ bool show_v_field = false;
 bool show_s_field = true;
 
 double viscosity = 0.0000001;
-double diffusion = 0.0000001;
+double diffusion = 0.0001;
 double dissipation = 0.0;
 
 // Non-User Tuned
@@ -336,13 +336,9 @@ void draw_initial_scalar_field() {
         }
     }
 
-    std::cout << "settign mesh" << std::endl;
     viz.data().set_mesh(V_global,F_global);
     viz.data().set_colors(C_global);
     viz.data().show_lines = false;
-    std::cout << viz.data_list.size() << std::endl;
-    std::cout << "set mesh" << std::endl;
-
 }
 
 int main(int argc, char **argv) {
