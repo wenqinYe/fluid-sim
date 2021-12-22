@@ -63,6 +63,12 @@ Once built, you can execute the assignment from inside the `build/` using
 
     ./stable-fluids
 
+In the original main.cpp files provided, you may change the lava_colour_scale variable to true to
+run the simulation with the red colour scale. 
+
+Alternatively if you'd to run the simulation for the banner image of the paper please rename main_lava.cpp
+to main.cpp and recompile.
+
 ## Warning
 When you rotate the camera too much to one side, the simulation may start to disappear. 
 This is due to some issues with the lighting in libigl (which we could not figure out how to fix) and not the actual simulation.
