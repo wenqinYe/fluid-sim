@@ -2,6 +2,10 @@
 
 This repo implements the [Stable Fluids paper](https://graphics.stanford.edu/courses/cs448-01-spring/papers/stam.pdf) by Jos Stam.
 
+For a demo and video presentation of the method please see the [demo video](https://www.youtube.com/watch?v=axlODAGJxrQ).
+
+For our paper please see the pdf file submitted in the root of the repository. [Link]()
+
 ![banner image](header.png)
 
 ## Prerequisite installation
