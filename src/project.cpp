@@ -4,6 +4,18 @@
 #include <common.h>
 #include <iostream>
 
+/**
+ * Applies the projection step on a vector field
+ * 
+ * Input:
+ *    v_field_x0 - The x component of the vector field to update
+ *    v_field_y0 - The y component of the vector field to update
+ *    V_field_z0 - The z component of the vector field to update
+ * Output:
+ *    v_field_x1 - The x component of the updated vector field
+ *    v_field_y1 - The y component of the updated vector field
+ *    V_field_z1 - The z component of the updated vector field
+ */
 void project(
     Eigen::VectorXd &V_field_x1, Eigen::VectorXd &V_field_y1, Eigen::VectorXd &V_field_z1, // Output vector field
     Eigen::VectorXd &V_field_x0, Eigen::VectorXd &V_field_y0, Eigen::VectorXd &V_field_z0 // Input vector field
