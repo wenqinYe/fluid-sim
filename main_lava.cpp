@@ -1,10 +1,10 @@
 #include <add_force.h>
 #include <advect.h>
 #include <common.h>
-#include <visualization.h>
 #include <diffuse.h>
-#include <project.h>
 #include <dissipate.h>
+#include <project.h>
+#include <visualization.h>
 
 #include <algorithm>
 #include <cmath>
@@ -35,7 +35,7 @@ double diffusion = 0.000000001;
 double dissipation = 0.0;
 
 // Non-User Tuned
-double t = 0;         // simulation time
+double t = 0;  // simulation time
 double domain = dim;
 int dim3 = std::pow(dim, 3.0);
 
@@ -45,9 +45,9 @@ Eigen::SparseMatrixd laplace_operator_scalar(dim3, dim3);
 Eigen::SparseMatrixd divergence_operator(dim3, 3 * dim3);
 Eigen::SparseMatrixd gradient_operator(3 * dim3, dim3);
 
-Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> diffusion_solver;
-Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> diffusion_solver_scalar;
-Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> laplace_solver_scalar;
+Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> diffusion_solver;
+Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> diffusion_solver_scalar;
+Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> laplace_solver_scalar;
 Eigen::SparseMatrixd diffusion_mat;
 Eigen::SparseMatrixd diffusion_mat_scalar;
 
@@ -89,10 +89,10 @@ void vstep() {
     //     }
     // }
 
-    for (int y = 1; y < dim-1; y++) {
-        f_x(flat_index(dim/2, dim-1 - y, dim/2)) = 0/(t+1.0);
-        f_y(flat_index(dim/2, dim-1 - y, dim/2)) = -5.0 * std::sin(y) * 1.0/(t+1.0);
-        f_z(flat_index(dim/2, dim-1 - y, dim/2)) = 0/(t+1.0);
+    for (int y = 1; y < dim - 1; y++) {
+        f_x(flat_index(dim / 2, dim - 1 - y, dim / 2)) = 0 / (t + 1.0);
+        f_y(flat_index(dim / 2, dim - 1 - y, dim / 2)) = -5.0 * std::sin(y) * 1.0 / (t + 1.0);
+        f_z(flat_index(dim / 2, dim - 1 - y, dim / 2)) = 0 / (t + 1.0);
     }
 
     add_force(V_field_x_1, V_field_x, f_x, dt);
@@ -109,8 +109,7 @@ void vstep() {
     advect(
         V_field_x_2, V_field_y_2, V_field_z_2,  // Output vector field
         V_field_x_1, V_field_y_1, V_field_z_1,  // Input vector field
-        dt
-    );
+        dt);
 
     /******** 3. Diffuse ********/
     Eigen::VectorXd V_field_x_3;
@@ -120,17 +119,17 @@ void vstep() {
     diffuse_scalar(V_field_x_3, V_field_x_2, dt, viscosity);
     diffuse_scalar(V_field_y_3, V_field_y_2, dt, viscosity);
     diffuse_scalar(V_field_z_3, V_field_z_2, dt, viscosity);
-    
-    apply_fixed_boundary_constraint(V_field_x_3, V_field_y_3, V_field_z_3); 
+
+    apply_fixed_boundary_constraint(V_field_x_3, V_field_y_3, V_field_z_3);
 
     /******** 4. Project ********/
     Eigen::VectorXd V_field_x_4;
     Eigen::VectorXd V_field_y_4;
     Eigen::VectorXd V_field_z_4;
 
-    project( 
+    project(
         V_field_x_4, V_field_y_4, V_field_z_4,  // Output vector field
-        V_field_x_3, V_field_y_3, V_field_z_3  // Input vector field
+        V_field_x_3, V_field_y_3, V_field_z_3   // Input vector field
     );
 
     /******* Update Velocity fields with new values ********/
@@ -145,10 +144,10 @@ void sstep() {
 
     Eigen::VectorXd f_source(S_field.size());
     f_source.setZero();
-    for (int i = dim/2-2; i < dim/2+2; i++) {
-        for (int j = dim/2-2; j < dim/2+2; j++) {
+    for (int i = dim / 2 - 2; i < dim / 2 + 2; i++) {
+        for (int j = dim / 2 - 2; j < dim / 2 + 2; j++) {
             for (int k = 1; k < 3; k++) {
-                f_source(flat_index(i, dim-1 - k, j)) = 5.0;
+                f_source(flat_index(i, dim - 1 - k, j)) = 5.0;
                 // f_source(flat_index(i, dim-1 - k, j)) = 0.0;
             }
         }
@@ -162,24 +161,23 @@ void sstep() {
     Eigen::VectorXd S_field_2;
 
     advect_scalar(
-        S_field_2, // Output vector field
+        S_field_2,  // Output vector field
         S_field_1,  // Input vector field
         V_field_x, V_field_y, V_field_z,
-        dt
-    );
+        dt);
 
     /******** 3. Diffuse ********/
     Eigen::VectorXd S_field_3;
 
     diffuse_scalar(S_field_3, S_field_2, dt, diffusion);
-    
-    apply_fixed_boundary_constraint_scalar(S_field_3); 
+
+    apply_fixed_boundary_constraint_scalar(S_field_3);
 
     /******** 4. Dissipate ********/
     Eigen::VectorXd S_field_4;
     dissipate(S_field_4, S_field_3, dt, dissipation);
 
-    apply_fixed_boundary_constraint_scalar(S_field_4); 
+    apply_fixed_boundary_constraint_scalar(S_field_4);
 
     /******* Update Scalar field with new values ********/
     S_field = S_field_4;
@@ -206,8 +204,7 @@ void draw_vector_field() {
                     viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(255, 0, 0));
                     viz.data().point_size = 5;
                     // viz.data().add_points(V1 - offset, Eigen::RowVector3d(255, 0, 0));
-                }
-                else {
+                } else {
                     viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0, 0, 0));
                     viz.data().point_size = 5;
                     // viz.data().add_points(V1 - offset, Eigen::RowVector3d(0, 0, 0));
@@ -225,15 +222,14 @@ void draw_scalar_field(igl::opengl::glfw::Viewer &viewer) {
         for (int j = 0; j < dim; j++) {
             for (int k = 0; k < dim; k++) {
                 Eigen::RowVector3d center((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
-                double voxel_dim = domain/(double)dim;
+                double voxel_dim = domain / (double)dim;
 
                 double scalar_val = S_field(flat_index(i, j, k));
                 double cmax = t * (173.436 / 47.5);
                 double yellow = (scalar_val / cmax) * 7.5;
-                
+
                 Eigen::RowVectorXd color(4);
                 color << 1, yellow, 0, scalar_val * 0.25;
-                
 
                 C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
                 curr += 1;
@@ -246,7 +242,6 @@ void draw_scalar_field(igl::opengl::glfw::Viewer &viewer) {
 }
 
 bool simulation_callback() {
-
     while (simulating) {
         vstep();
         if (show_s_field)
@@ -265,15 +260,13 @@ bool draw_callback(igl::opengl::glfw::Viewer &viewer) {
     if (show_s_field)
         draw_scalar_field(viewer);
 
-
     return false;
 }
 
 void draw_initial_scalar_field() {
-   Eigen::MatrixXd black(dim3, 4);
+    Eigen::MatrixXd black(dim3, 4);
     Eigen::RowVectorXd color(4);
-    color << 0. , 0. , 0. , 0.; 
-
+    color << 0., 0., 0., 0.;
 
     black = color.replicate(dim3, 1);
 
@@ -292,33 +285,31 @@ void draw_initial_scalar_field() {
         for (int j = 0; j < dim; j++) {
             for (int k = 0; k < dim; k++) {
                 Eigen::RowVector3d center((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
-                double voxel_dim = domain/(double)dim;
+                double voxel_dim = domain / (double)dim;
 
                 V_global.block<8, 3>(8 * curr, 0) += center.replicate(V.rows(), 1);
                 F_global.block<12, 3>(12 * curr, 0).array() += curr * 8;
                 C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
                 curr += 1;
-            
             }
         }
     }
 
-    viz.data().set_mesh(V_global,F_global);
+    viz.data().set_mesh(V_global, F_global);
     viz.data().set_colors(C_global);
     viz.data().show_lines = false;
 }
 
 int main(int argc, char **argv) {
-
-    p00 = flat_index((int)(dim / 2)-1, (int)(dim / 2)-1, dim-1);
-    p01 = flat_index((int)(dim / 2)-1, (int)(dim / 2), dim-1);
-    p02 = flat_index((int)(dim / 2)-1, (int)(dim / 2)+1, dim-1);
-    p10 = flat_index((int)(dim / 2)+0, (int)(dim / 2)-1, dim-1);
-    p11 = flat_index((int)(dim / 2)+0, (int)(dim / 2), dim-1);
-    p12 = flat_index((int)(dim / 2)+0, (int)(dim / 2)+1, dim-1);
-    p20 = flat_index((int)(dim / 2)+1, (int)(dim / 2)-1, dim-1);
-    p21 = flat_index((int)(dim / 2)+1, (int)(dim / 2), dim-1);
-    p22 = flat_index((int)(dim / 2)+1, (int)(dim / 2)+1, dim-1);
+    p00 = flat_index((int)(dim / 2) - 1, (int)(dim / 2) - 1, dim - 1);
+    p01 = flat_index((int)(dim / 2) - 1, (int)(dim / 2), dim - 1);
+    p02 = flat_index((int)(dim / 2) - 1, (int)(dim / 2) + 1, dim - 1);
+    p10 = flat_index((int)(dim / 2) + 0, (int)(dim / 2) - 1, dim - 1);
+    p11 = flat_index((int)(dim / 2) + 0, (int)(dim / 2), dim - 1);
+    p12 = flat_index((int)(dim / 2) + 0, (int)(dim / 2) + 1, dim - 1);
+    p20 = flat_index((int)(dim / 2) + 1, (int)(dim / 2) - 1, dim - 1);
+    p21 = flat_index((int)(dim / 2) + 1, (int)(dim / 2), dim - 1);
+    p22 = flat_index((int)(dim / 2) + 1, (int)(dim / 2) + 1, dim - 1);
 
     // Construct the laplace operator matrix
     build_laplace_op();
@@ -333,7 +324,6 @@ int main(int argc, char **argv) {
     viz.core().background_color(0) = 0;
     viz.core().background_color(1) = 0;
     viz.core().background_color(2) = 0;
-
 
     /******** Create the draw callback ********/
     viz.callback_post_draw = &draw_callback;
@@ -356,7 +346,6 @@ int main(int argc, char **argv) {
     S_field = Eigen::VectorXd(std::pow(dim, 3.0));
     S_field.setZero();
 
-
     // This creates a velocity field that initially has vectors moving out from some central point
     // (like an explosion from a central point)
     for (int i = 0; i < dim; i++) {
@@ -370,10 +359,8 @@ int main(int argc, char **argv) {
         }
     }
 
-
     apply_fixed_boundary_constraint(
-        V_field_x, V_field_y, V_field_z
-    );
+        V_field_x, V_field_y, V_field_z);
 
     // Show the velocity_field in the visualizaiton
     //
