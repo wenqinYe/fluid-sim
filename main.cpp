@@ -22,7 +22,7 @@ Eigen::VectorXd V_field_z;
 Eigen::VectorXd S_field;
 
 // User Tuned Parameters
-double dt = 0.5; // time step
+double dt = 0.1; // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
