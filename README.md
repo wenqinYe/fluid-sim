@@ -67,4 +67,8 @@ Once built, you can execute the assignment from inside the `build/` using
 When you rotate the camera too much to one side, the simulation may start to disappear. 
 This is due to some issues with the lighting in libigl (which we could not figure out how to fix) and not the actual simulation.
 
+## Report
+[report.pdf]()
 
+## Video
+[https://www.youtube.com/watch?v=axlODAGJxrQ](https://www.youtube.com/watch?v=axlODAGJxrQ)
