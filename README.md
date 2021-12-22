@@ -4,7 +4,7 @@ This repo implements the [Stable Fluids paper](https://graphics.stanford.edu/cou
 
 ![banner image](header.png)
 
-### Prerequisite installation
+## Prerequisite installation
 
 On all platforms, we will assume you have installed cmake and a modern c++
 compiler on Mac OS X[¹](#¹macusers), Linux[²](#²linuxusers), or
@@ -13,7 +13,7 @@ Windows[³](#³windowsusers).
 We also assume that you have cloned this repository using the `--recursive`
 flag (if not then issue `git submodule update --init --recursive`). 
 
-### Layout
+## Layout
 
 The repo is layed out in the following format
 
@@ -45,8 +45,8 @@ the fluid simulation (as the fluid is represented by a collection of cubes).
 
 ## Running the simulation
 
-First run the following commands to create a build director and to create
-the required makefile.
+Run the following commands to create a build directory and to also create the 
+makefile for building the simulation.
 
     mkdir build
     cd build
@@ -63,7 +63,7 @@ Once built, you can execute the assignment from inside the `build/` using
 
     ./stable-fluids
 
-## Warnings
+## Warning
 When you rotate the camera too much to one side, the simulation may start to disappear. 
 This is due to some issues with the lighting in libigl (which we could not figure out how to fix) and not the actual simulation.
 
