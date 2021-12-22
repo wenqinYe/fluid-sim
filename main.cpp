@@ -11,13 +11,6 @@
 #include <iostream>
 #include <thread>
 
-#if defined(__APPLE__)
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
-
 igl::opengl::glfw::Viewer viz;
 
 // Simulation state
@@ -29,7 +22,7 @@ Eigen::VectorXd V_field_z;
 Eigen::VectorXd S_field;
 
 // User Tuned Parameters
-double dt = 0.1;  // time step
+double dt = 0.5; // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
@@ -86,33 +79,15 @@ void vstep() {
     f_y.setZero();
     f_z.setZero();
 
-    // f_x(p00) = 1;
-    // f_x(p01) = 1;
-    // f_x(p02) = 1;
-    // f_x(p10) = 1;
-    // f_x(p11) = 1;
-    // f_x(p12) = 1;
-    // f_x(p20) = 1;
-    // f_x(p21) = 1;
-    // f_x(p22) = 1;
-
-    // add an upwards force of 1 to all the cells on the x,y plane
-    // and decay it by 1/(t+1)
-    for (int i = 1; i < dim-1; i++) {
-        for (int j = 1; j < dim-1; j++) {
-            f_x(flat_index(i, j, 1)) = 0* 1.0/(t+1.0);
-            f_y(flat_index(i, j, 1)) = 0/(t+1.0);
-            f_z(flat_index(i, j, 1)) = 0.0/(t+1.0);
-        }
-    }
-
-    for (int z = 1; z < dim-1; z++) {
+    for (int z = 1; z < dim/2; z++) {
         f_x(flat_index(dim/2, dim/2, z)) = 0/(t+1.0);
         f_y(flat_index(dim/2, dim/2, z)) = 0/(t+1.0);
         f_z(flat_index(dim/2, dim/2, z)) = 5.0 * std::sin(z) * 1.0/(t+1.0);
+
+        f_x(flat_index(dim/2, dim/2, dim - 1 -z)) = 0/(t+1.0);
+        f_y(flat_index(dim/2, dim/2, dim - 1 - z)) = 0/(t+1.0);
+        f_z(flat_index(dim/2, dim/2, dim - 1 - z)) = -5.0 * std::sin(z) * 1.0/(t+1.0);
     }
-
-
 
     add_force(V_field_x_1, V_field_x, f_x, dt);
     add_force(V_field_y_1, V_field_y, f_y, dt);
@@ -168,7 +143,7 @@ void sstep() {
         for (int j = dim/2-2; j < dim/2+2; j++) {
             for (int k = 1; k < 3; k++) {
                 f_source(flat_index(i, j, k)) = 5.0;
-                f_source(flat_index(i, j, dim -1 - k)) = 0.0;
+                f_source(flat_index(i, j, dim -1 - k)) = 5.0;
             }
         }
     }
@@ -224,12 +199,10 @@ void draw_vector_field() {
                 if (flat == p00 || flat == p01 || flat == p02 || flat == p10 || flat == p11 || flat == p12 || flat == p20 || flat == p21 || flat == p22) {
                     viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(255, 0, 0));
                     viz.data().point_size = 5;
-                    // viz.data().add_points(V1 - offset, Eigen::RowVector3d(255, 0, 0));
                 }
                 else {
                     viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0, 0, 0));
                     viz.data().point_size = 5;
-                    // viz.data().add_points(V1 - offset, Eigen::RowVector3d(0, 0, 0));
                 }
             }
         }
@@ -251,7 +224,6 @@ void draw_scalar_field(igl::opengl::glfw::Viewer &viewer) {
                 Eigen::RowVectorXd color(4);
                 color << 1. , 1. , 1. , scalar_val * 0.25;
 
-
                 C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
                 curr += 1;
             }
@@ -269,8 +241,6 @@ bool simulation_callback() {
         if (show_s_field)
             sstep();
         t += dt;
-
-        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     return false;
@@ -352,12 +322,6 @@ int main(int argc, char **argv) {
     viz.callback_post_draw = &draw_callback;
 
     /******** Add particles to the visualization ********/
-    // viz.core().is_animating = true;
-    // voz.data().clear();
-    // viz.data().point_size = 4;
-    // v.data().set_points(P,Eigen::RowVector3d(0,0,0));
-    // std::map<int, Eigen::RowVector3d> colors;
-
     draw_initial_scalar_field();
 
     /******** Create the initial scalar, velocity field and add them to the visualization ********/
@@ -369,9 +333,6 @@ int main(int argc, char **argv) {
     S_field = Eigen::VectorXd(std::pow(dim, 3.0));
     S_field.setZero();
 
-
-    // This creates a velocity field that initially has vectors moving out from some central point
-    // (like an explosion from a central point)
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             for (int k = 0; k < dim; k++) {
@@ -402,8 +363,6 @@ int main(int argc, char **argv) {
     if (show_v_field)
         draw_vector_field();
 
-    // if (show_s_field)
-    //     draw_scalar_field(viewer);
 
     /******** Start simulation on background thread ********/
     std::thread simulation_thread(simulation_callback);
