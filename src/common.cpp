@@ -1,14 +1,13 @@
 #include <common.h>
 
 int flat_index(int i, int j, int k) {
-    return i + (j * dim) + (dim * dim * k); 
+    return i + (j * dim) + (dim * dim * k);
 }
 
 void apply_fixed_boundary_constraint(
-    Eigen::VectorXd &V_field_x, 
-    Eigen::VectorXd &V_field_y, 
-    Eigen::VectorXd &V_field_z
-) {
+    Eigen::VectorXd &V_field_x,
+    Eigen::VectorXd &V_field_y,
+    Eigen::VectorXd &V_field_z) {
     // Wall where k is 0
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
@@ -21,9 +20,9 @@ void apply_fixed_boundary_constraint(
     // Wall where k is dim - 1
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-            V_field_x(flat_index(i, j, dim-1)) = -1 * V_field_x(flat_index(i, j, dim-2));
-            V_field_y(flat_index(i, j, dim-1)) = -1 * V_field_y(flat_index(i, j, dim-2));
-            V_field_z(flat_index(i, j, dim-1)) = -1 * V_field_z(flat_index(i, j, dim-2));
+            V_field_x(flat_index(i, j, dim - 1)) = -1 * V_field_x(flat_index(i, j, dim - 2));
+            V_field_y(flat_index(i, j, dim - 1)) = -1 * V_field_y(flat_index(i, j, dim - 2));
+            V_field_z(flat_index(i, j, dim - 1)) = -1 * V_field_z(flat_index(i, j, dim - 2));
         }
     }
 
@@ -39,9 +38,9 @@ void apply_fixed_boundary_constraint(
     // Wall where j is dim-1
     for (int i = 0; i < dim; i++) {
         for (int k = 0; k < dim; k++) {
-            V_field_x(flat_index(i, dim-1, k)) = -1 * V_field_x(flat_index(i, dim-2, k));
-            V_field_y(flat_index(i, dim-1, k)) = -1 * V_field_y(flat_index(i, dim-2, k));
-            V_field_z(flat_index(i, dim-1, k)) = -1 * V_field_z(flat_index(i, dim-2, k));
+            V_field_x(flat_index(i, dim - 1, k)) = -1 * V_field_x(flat_index(i, dim - 2, k));
+            V_field_y(flat_index(i, dim - 1, k)) = -1 * V_field_y(flat_index(i, dim - 2, k));
+            V_field_z(flat_index(i, dim - 1, k)) = -1 * V_field_z(flat_index(i, dim - 2, k));
         }
     }
 
@@ -57,9 +56,9 @@ void apply_fixed_boundary_constraint(
     // Wall where i is dim-1
     for (int j = 0; j < dim; j++) {
         for (int k = 0; k < dim; k++) {
-            V_field_x(flat_index(dim-1, j, k)) = -1 * V_field_x(flat_index(dim-2, j, k));
-            V_field_y(flat_index(dim-1, j, k)) = -1 * V_field_y(flat_index(dim-2, j, k));
-            V_field_z(flat_index(dim-1, j, k)) = -1 * V_field_z(flat_index(dim-2, j, k));
+            V_field_x(flat_index(dim - 1, j, k)) = -1 * V_field_x(flat_index(dim - 2, j, k));
+            V_field_y(flat_index(dim - 1, j, k)) = -1 * V_field_y(flat_index(dim - 2, j, k));
+            V_field_z(flat_index(dim - 1, j, k)) = -1 * V_field_z(flat_index(dim - 2, j, k));
         }
     }
 }
@@ -75,7 +74,7 @@ void apply_fixed_boundary_constraint_scalar(Eigen::VectorXd &P_field) {
     // Wall where k is dim - 1
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-            P_field(flat_index(i, j, dim-1)) = P_field(flat_index(i, j, dim-2));
+            P_field(flat_index(i, j, dim - 1)) = P_field(flat_index(i, j, dim - 2));
         }
     }
 
@@ -89,7 +88,7 @@ void apply_fixed_boundary_constraint_scalar(Eigen::VectorXd &P_field) {
     // Wall where j is dim-1
     for (int i = 0; i < dim; i++) {
         for (int k = 0; k < dim; k++) {
-            P_field(flat_index(i, dim-1, k)) = P_field(flat_index(i, dim-2, k));
+            P_field(flat_index(i, dim - 1, k)) = P_field(flat_index(i, dim - 2, k));
         }
     }
 
@@ -103,27 +102,26 @@ void apply_fixed_boundary_constraint_scalar(Eigen::VectorXd &P_field) {
     // Wall where i is dim-1
     for (int j = 0; j < dim; j++) {
         for (int k = 0; k < dim; k++) {
-            P_field(flat_index(dim-1, j, k)) = P_field(flat_index(dim-2, j, k));
+            P_field(flat_index(dim - 1, j, k)) = P_field(flat_index(dim - 2, j, k));
         }
     }
 }
 
 void trilinear_interpolation(
     Eigen::Vector3d &result,
-    Eigen::Vector3d &position, // not index positions, but the actual position in 3d space 
-    Eigen::VectorXd &V_field_x0, 
-    Eigen::VectorXd &V_field_y0, 
-    Eigen::VectorXd &V_field_z0
-) {
-    double voxel_dim = domain/(double)dim;
+    Eigen::Vector3d &position,  // not index positions, but the actual position in 3d space
+    Eigen::VectorXd &V_field_x0,
+    Eigen::VectorXd &V_field_y0,
+    Eigen::VectorXd &V_field_z0) {
+    double voxel_dim = domain / (double)dim;
 
     // Constrain it so that we are not doing interpolation on the outer edges
     Eigen::Vector3d pos = position;
 
     // Get the indices for the closest cells
-    double x = (pos(0) - voxel_dim/2.0)/voxel_dim;
-    double y = (pos(1) - voxel_dim/2.0)/voxel_dim;
-    double z = (pos(2) - voxel_dim/2.0)/voxel_dim;
+    double x = (pos(0) - voxel_dim / 2.0) / voxel_dim;
+    double y = (pos(1) - voxel_dim / 2.0) / voxel_dim;
+    double z = (pos(2) - voxel_dim / 2.0) / voxel_dim;
 
     double max_idx = dim - 2;
     x = std::max(1.0, x);
@@ -171,31 +169,30 @@ void trilinear_interpolation(
     Eigen::Vector3d c111 = Eigen::Vector3d(V_field_x0(idx), V_field_y0(idx), V_field_z0(idx));
 
     // Do the trilinear interpolation
-    Eigen::Vector3d c00 = c000 * (1-x_diff) + c100 * x_diff;
-    Eigen::Vector3d c01 = c001 * (1-x_diff) + c101 * x_diff;
-    Eigen::Vector3d c10 = c010 * (1-x_diff) + c110 * x_diff;
-    Eigen::Vector3d c11 = c011 * (1-x_diff) + c111 * x_diff;
+    Eigen::Vector3d c00 = c000 * (1 - x_diff) + c100 * x_diff;
+    Eigen::Vector3d c01 = c001 * (1 - x_diff) + c101 * x_diff;
+    Eigen::Vector3d c10 = c010 * (1 - x_diff) + c110 * x_diff;
+    Eigen::Vector3d c11 = c011 * (1 - x_diff) + c111 * x_diff;
 
-    Eigen::Vector3d c0 = c00 * (1-y_diff) + c10 * y_diff;
-    Eigen::Vector3d c1 = c01 * (1-y_diff) + c11 * y_diff;
+    Eigen::Vector3d c0 = c00 * (1 - y_diff) + c10 * y_diff;
+    Eigen::Vector3d c1 = c01 * (1 - y_diff) + c11 * y_diff;
 
-    result = c0 * (1-z_diff) + c1 * z_diff; 
+    result = c0 * (1 - z_diff) + c1 * z_diff;
 }
 
 void trilinear_interpolation_scalar(
     double &result,
-    Eigen::Vector3d &position, // not index positions, but the actual position in 3d space 
-    Eigen::VectorXd &field
-) {
-    double voxel_dim = domain/(double)dim;
+    Eigen::Vector3d &position,  // not index positions, but the actual position in 3d space
+    Eigen::VectorXd &field) {
+    double voxel_dim = domain / (double)dim;
 
     // Constrain it so that we are not doing interpolation on the outer edges
     Eigen::Vector3d pos = position;
 
     // Get the indices for the closest cells
-    double x = (pos(0) - voxel_dim/2.0)/voxel_dim;
-    double y = (pos(1) - voxel_dim/2.0)/voxel_dim;
-    double z = (pos(2) - voxel_dim/2.0)/voxel_dim;
+    double x = (pos(0) - voxel_dim / 2.0) / voxel_dim;
+    double y = (pos(1) - voxel_dim / 2.0) / voxel_dim;
+    double z = (pos(2) - voxel_dim / 2.0) / voxel_dim;
 
     double max_idx = dim - 2;
     x = std::max(1.0, x);
@@ -243,15 +240,15 @@ void trilinear_interpolation_scalar(
     double c111 = field(idx);
 
     // Do the trilinear interpolation
-    double c00 = c000 * (1-x_diff) + c100 * x_diff;
-    double c01 = c001 * (1-x_diff) + c101 * x_diff;
-    double c10 = c010 * (1-x_diff) + c110 * x_diff;
-    double c11 = c011 * (1-x_diff) + c111 * x_diff;
+    double c00 = c000 * (1 - x_diff) + c100 * x_diff;
+    double c01 = c001 * (1 - x_diff) + c101 * x_diff;
+    double c10 = c010 * (1 - x_diff) + c110 * x_diff;
+    double c11 = c011 * (1 - x_diff) + c111 * x_diff;
 
-    double c0 = c00 * (1-y_diff) + c10 * y_diff;
-    double c1 = c01 * (1-y_diff) + c11 * y_diff;
+    double c0 = c00 * (1 - y_diff) + c10 * y_diff;
+    double c1 = c01 * (1 - y_diff) + c11 * y_diff;
 
-    result = c0 * (1-z_diff) + c1 * z_diff;
+    result = c0 * (1 - z_diff) + c1 * z_diff;
 }
 
 void build_laplace_op() {
@@ -260,7 +257,7 @@ void build_laplace_op() {
     std::vector<TRI> tripletList_laplace;
     std::vector<TRI> tripletList_laplace_scalar;
 
-    double voxel_dim = domain/(double)dim;
+    double voxel_dim = domain / (double)dim;
 
     double pos_grad_coeff = 1.0 / std::pow(voxel_dim, 2.0);
     double neg_grad_coeff = -1.0 / std::pow(voxel_dim, 2.0);
@@ -271,39 +268,39 @@ void build_laplace_op() {
                 int row_ind = flat_index(i, j, k);
                 // Laplacian operator for x component of vector field
                 tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k+1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i - 1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i + 1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j - 1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j + 1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k - 1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(row_ind, flat_index(i, j, k + 1), pos_grad_coeff));
 
                 // Laplacian operator for y component of vector field
                 tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j, k+1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i - 1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i + 1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j - 1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j + 1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j, k - 1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(dim3 + row_ind, dim3 + flat_index(i, j, k + 1), pos_grad_coeff));
 
                 // Laplacian operator for z component of vector field
                 tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k+1), pos_grad_coeff));
-            
+                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i - 1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i + 1, j, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j - 1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j + 1, k), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k - 1), pos_grad_coeff));
+                tripletList_laplace.push_back(TRI(2 * dim3 + row_ind, 2 * dim3 + flat_index(i, j, k + 1), pos_grad_coeff));
+
                 // Build the scalar version of the laplacian
                 tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k), 6 * neg_grad_coeff));
-                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i-1, j, k), pos_grad_coeff));
-                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
-                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j-1, k), pos_grad_coeff));
-                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j+1, k), pos_grad_coeff));
-                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k-1), pos_grad_coeff));
-                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k+1), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i - 1, j, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i + 1, j, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j - 1, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j + 1, k), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k - 1), pos_grad_coeff));
+                tripletList_laplace_scalar.push_back(TRI(row_ind, flat_index(i, j, k + 1), pos_grad_coeff));
             }
         }
     }
@@ -317,7 +314,7 @@ void build_divergence_op() {
     typedef Eigen::Triplet<double> TRI;
     std::vector<TRI> tripletList_divergence;
 
-    double voxel_dim = domain/(double)dim;
+    double voxel_dim = domain / (double)dim;
 
     double pos_grad_coeff = 1.0 / (2.0 * voxel_dim);
     double neg_grad_coeff = -1.0 / (2.0 * voxel_dim);
@@ -326,15 +323,15 @@ void build_divergence_op() {
         for (int i = 1; i < dim - 1; i++) {
             for (int j = 1; j < dim - 1; j++) {
                 int row_ind = flat_index(i, j, k);
-                
-                tripletList_divergence.push_back(TRI(row_ind, flat_index(i-1, j, k), neg_grad_coeff));
-                tripletList_divergence.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
-                
-                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j-1, k) + dim3, neg_grad_coeff));
-                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j+1, k) + dim3, pos_grad_coeff));
 
-                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j, k-1) + 2 * dim3, neg_grad_coeff));
-                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j, k+1) + 2 * dim3, pos_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i - 1, j, k), neg_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i + 1, j, k), pos_grad_coeff));
+
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j - 1, k) + dim3, neg_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j + 1, k) + dim3, pos_grad_coeff));
+
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j, k - 1) + 2 * dim3, neg_grad_coeff));
+                tripletList_divergence.push_back(TRI(row_ind, flat_index(i, j, k + 1) + 2 * dim3, pos_grad_coeff));
             }
         }
     }
@@ -346,7 +343,7 @@ void build_gradient_op() {
     typedef Eigen::Triplet<double> TRI;
     std::vector<TRI> tripletList_gradient;
 
-    double voxel_dim = domain/(double)dim;
+    double voxel_dim = domain / (double)dim;
 
     double pos_grad_coeff = 1.0 / (2.0 * voxel_dim);
     double neg_grad_coeff = -1.0 / (2.0 * voxel_dim);
@@ -356,14 +353,14 @@ void build_gradient_op() {
             for (int j = 1; j < dim - 1; j++) {
                 int row_ind = flat_index(i, j, k);
 
-                tripletList_gradient.push_back(TRI(row_ind, flat_index(i-1, j, k), neg_grad_coeff));
-                tripletList_gradient.push_back(TRI(row_ind, flat_index(i+1, j, k), pos_grad_coeff));
-                
-                tripletList_gradient.push_back(TRI(row_ind + dim3, flat_index(i, j-1, k), neg_grad_coeff));
-                tripletList_gradient.push_back(TRI(row_ind + dim3, flat_index(i, j+1, k), pos_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind, flat_index(i - 1, j, k), neg_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind, flat_index(i + 1, j, k), pos_grad_coeff));
 
-                tripletList_gradient.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k-1), neg_grad_coeff));
-                tripletList_gradient.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k+1), pos_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind + dim3, flat_index(i, j - 1, k), neg_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind + dim3, flat_index(i, j + 1, k), pos_grad_coeff));
+
+                tripletList_gradient.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k - 1), neg_grad_coeff));
+                tripletList_gradient.push_back(TRI(row_ind + 2 * dim3, flat_index(i, j, k + 1), pos_grad_coeff));
             }
         }
     }

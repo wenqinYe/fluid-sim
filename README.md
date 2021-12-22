@@ -2,6 +2,10 @@
 
 This repo implements the [Stable Fluids paper](https://graphics.stanford.edu/courses/cs448-01-spring/papers/stam.pdf) by Jos Stam.
 
+For a demo and video presentation of the method please see the [demo video](https://www.youtube.com/watch?v=axlODAGJxrQ).
+
+For our paper please see the pdf file submitted in the root of the repository. [Link]()
+
 ![banner image](header.png)
 
 ## Prerequisite installation
@@ -62,6 +66,12 @@ called `stable-fluids.sln` that you can open and build from there. Building the 
 Once built, you can execute the assignment from inside the `build/` using 
 
     ./stable-fluids
+
+In the original main.cpp files provided, you may change the lava_colour_scale variable to true to
+run the simulation with the red colour scale. 
+
+Alternatively if you'd to run the simulation for the banner image of the paper please rename main_lava.cpp
+to main.cpp and recompile.
 
 ## Warning
 When you rotate the camera too much to one side, the simulation may start to disappear. 

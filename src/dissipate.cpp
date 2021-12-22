@@ -2,7 +2,7 @@
 
 /**
  * Dissipates a scalar field by one timestep
- * 
+ *
  * Input:
  *    sclar_field_in - The scalar field to apply dissipation to
  *    dt - The timestep size
