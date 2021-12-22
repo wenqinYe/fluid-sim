@@ -22,15 +22,13 @@ Eigen::VectorXd V_field_z;
 Eigen::VectorXd S_field;
 
 // User Tuned Parameters
-double dt = 0.1; // time step
+double dt = 0.07;  // time step
 bool simulating = true;
 
 // Global values also accessible by the functions in src/*
 int dim = 30;
 bool show_v_field = false;
 bool show_s_field = true;
-
-bool lava_colour_scale = false;
 
 double viscosity = 0.000000001;
 double diffusion = 0.000000001;
@@ -81,14 +79,20 @@ void vstep() {
     f_y.setZero();
     f_z.setZero();
 
-    for (int z = 1; z < dim/2; z++) {
-        f_x(flat_index(dim/2, dim/2, z)) = 0/(t+1.0);
-        f_y(flat_index(dim/2, dim/2, z)) = 0/(t+1.0);
-        f_z(flat_index(dim/2, dim/2, z)) = 5.0 * std::sin(z) * 1.0/(t+1.0);
+    // add an upwards force of 1 to all the cells on the x,y plane
+    // and decay it by 1/(t+1)
+    // for (int i = 1; i < dim-1; i++) {
+    //     for (int j = 1; j < dim-1; j++) {
+    //         f_x(flat_index(i, j, 1)) = 0* 1.0/(t+1.0);
+    //         f_y(flat_index(i, j, 1)) = 0/(t+1.0);
+    //         f_z(flat_index(i, j, 1)) = 0.0/(t+1.0);
+    //     }
+    // }
 
-        f_x(flat_index(dim/2, dim/2, dim - 1 -z)) = 0/(t+1.0);
-        f_y(flat_index(dim/2, dim/2, dim - 1 - z)) = 0/(t+1.0);
-        f_z(flat_index(dim/2, dim/2, dim - 1 - z)) = -5.0 * std::sin(z) * 1.0/(t+1.0);
+    for (int y = 1; y < dim-1; y++) {
+        f_x(flat_index(dim/2, dim-1 - y, dim/2)) = 0/(t+1.0);
+        f_y(flat_index(dim/2, dim-1 - y, dim/2)) = -5.0 * std::sin(y) * 1.0/(t+1.0);
+        f_z(flat_index(dim/2, dim-1 - y, dim/2)) = 0/(t+1.0);
     }
 
     add_force(V_field_x_1, V_field_x, f_x, dt);
@@ -144,8 +148,8 @@ void sstep() {
     for (int i = dim/2-2; i < dim/2+2; i++) {
         for (int j = dim/2-2; j < dim/2+2; j++) {
             for (int k = 1; k < 3; k++) {
-                f_source(flat_index(i, j, k)) = 5.0;
-                f_source(flat_index(i, j, dim -1 - k)) = 5.0;
+                f_source(flat_index(i, dim-1 - k, j)) = 5.0;
+                // f_source(flat_index(i, dim-1 - k, j)) = 0.0;
             }
         }
     }
@@ -201,71 +205,55 @@ void draw_vector_field() {
                 if (flat == p00 || flat == p01 || flat == p02 || flat == p10 || flat == p11 || flat == p12 || flat == p20 || flat == p21 || flat == p22) {
                     viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(255, 0, 0));
                     viz.data().point_size = 5;
+                    // viz.data().add_points(V1 - offset, Eigen::RowVector3d(255, 0, 0));
                 }
                 else {
                     viz.data().add_edges(V1 - offset, V2 - offset, Eigen::RowVector3d(0, 0, 0));
                     viz.data().point_size = 5;
+                    // viz.data().add_points(V1 - offset, Eigen::RowVector3d(0, 0, 0));
                 }
             }
         }
     }
 }
 
-
 void draw_scalar_field(igl::opengl::glfw::Viewer &viewer) {
     Eigen::MatrixXd C_global(12 * dim3, 4);
 
-    if (lava_colour_scale) {
+    int curr = 0;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            for (int k = 0; k < dim; k++) {
+                Eigen::RowVector3d center((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
+                double voxel_dim = domain/(double)dim;
 
-        int curr = 0;
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                for (int k = 0; k < dim; k++) {
-                    Eigen::RowVector3d center((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
-                    double voxel_dim = domain/(double)dim;
+                double scalar_val = S_field(flat_index(i, j, k));
+                double cmax = t * (173.436 / 47.5);
+                double yellow = (scalar_val / cmax) * 7.5;
+                
+                Eigen::RowVectorXd color(4);
+                color << 1, yellow, 0, scalar_val * 0.25;
+                
 
-                    double scalar_val = S_field(flat_index(i, j, k));
-                    double cmax = t * (173.436 / 47.5);
-                    double yellow = (scalar_val / cmax) * 7.5;
-                    
-                    Eigen::RowVectorXd color(4);
-                    color << 1, yellow, 0, scalar_val * 0.25;
-
-                    C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
-                    curr += 1;
-                }
+                C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
+                curr += 1;
             }
         }
     }
-    else {
-        int curr = 0;
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                for (int k = 0; k < dim; k++) {
-                    Eigen::RowVector3d center((domain / (double)dim) * (double)i, (domain / (double)dim) * (double)j, (domain / (double)dim) * (double)k);
-                    double voxel_dim = domain/(double)dim;
 
-                    double scalar_val = S_field(flat_index(i, j, k));                    
-                    Eigen::RowVectorXd color(4);
-                    color << 1, 1, 1, scalar_val * 0.25;
-
-                    C_global.block<12, 4>(12 * curr, 0) = color.replicate(12, 1);
-                    curr += 1;
-                }
-            }
-        }
-    }
-    
     viewer.core().lighting_factor = 0;
     viewer.data().set_colors(C_global);
 }
 
 bool simulation_callback() {
+
     while (simulating) {
         vstep();
         if (show_s_field)
             sstep();
         t += dt;
+
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     return false;
@@ -338,21 +326,25 @@ int main(int argc, char **argv) {
     build_gradient_op();
     compute_solvers(dt, diffusion);
 
-    if (lava_colour_scale) {
-        viz.core().background_color(0) = 0;
-        viz.core().background_color(1) = 0;
-        viz.core().background_color(2) = 0;
-    }
-    else {
-        viz.core().background_color(0) = 0.529;
-        viz.core().background_color(1) = 0.807;
-        viz.core().background_color(2) = 0.921;
-    }
+    // viz.core().background_color(0) = 0.529;
+    // viz.core().background_color(1) = 0.807;
+    // viz.core().background_color(2) = 0.921;
+
+    viz.core().background_color(0) = 0;
+    viz.core().background_color(1) = 0;
+    viz.core().background_color(2) = 0;
+
 
     /******** Create the draw callback ********/
     viz.callback_post_draw = &draw_callback;
 
     /******** Add particles to the visualization ********/
+    // viz.core().is_animating = true;
+    // voz.data().clear();
+    // viz.data().point_size = 4;
+    // v.data().set_points(P,Eigen::RowVector3d(0,0,0));
+    // std::map<int, Eigen::RowVector3d> colors;
+
     draw_initial_scalar_field();
 
     /******** Create the initial scalar, velocity field and add them to the visualization ********/
@@ -364,6 +356,9 @@ int main(int argc, char **argv) {
     S_field = Eigen::VectorXd(std::pow(dim, 3.0));
     S_field.setZero();
 
+
+    // This creates a velocity field that initially has vectors moving out from some central point
+    // (like an explosion from a central point)
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             for (int k = 0; k < dim; k++) {
@@ -394,6 +389,8 @@ int main(int argc, char **argv) {
     if (show_v_field)
         draw_vector_field();
 
+    // if (show_s_field)
+    //     draw_scalar_field(viewer);
 
     /******** Start simulation on background thread ********/
     std::thread simulation_thread(simulation_callback);
