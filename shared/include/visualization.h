@@ -18,6 +18,7 @@
 
 //Eigen
 #include <Eigen/Dense>
+#include <EigenTypes.h>
 
 namespace Visualize {
 
